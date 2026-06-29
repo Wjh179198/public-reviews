@@ -4,7 +4,7 @@
 
     <!-- 未注册商家 -->
     <div v-if="!userStore.isMerchant" class="card-wrapper no-shop">
-      <el-result icon="info" title="您未注册为商家" sub-title="注册成为商家，管理您的店铺">
+      <el-result icon="info" title="您未注册为商户" sub-title="注册成为商家，管理您的店铺">
         <template #extra>
           <el-button type="primary" @click="$router.push('/register-shop')">
             立即注册

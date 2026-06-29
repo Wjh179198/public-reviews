@@ -16,7 +16,7 @@
       >
         <el-menu-item index="/shops">
           <el-icon><Shop /></el-icon>
-          <span>商家展示</span>
+          <span>商户展示</span>
         </el-menu-item>
         <el-menu-item index="/blog">
           <el-icon><Notebook /></el-icon>
@@ -28,7 +28,7 @@
         </el-menu-item>
         <el-menu-item index="/register-shop">
           <el-icon><CirclePlus /></el-icon>
-          <span>成为商家</span>
+          <span>注册商户</span>
         </el-menu-item>
         <el-menu-item index="/shop-manage">
           <el-icon><Setting /></el-icon>

@@ -1,7 +1,7 @@
 <template>
   <div class="page-container">
     <div class="card-wrapper" style="max-width: 600px">
-      <h3 class="page-title">成为商家</h3>
+      <h3 class="page-title">注册商户</h3>
 
       <el-form label-position="top" size="large">
         <el-form-item label="商家类型" required>

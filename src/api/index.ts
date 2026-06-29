@@ -23,23 +23,33 @@ instance.interceptors.request.use(
 )
 
 // 响应拦截器 - 统一错误处理
+// 后端 code 约定: 1=成功, 0=失败
 instance.interceptors.response.use(
   (response) => {
     const res = response.data as ApiResponse
-    if (res.code === 401) {
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-      ElMessage.error('登录已过期，请重新登录')
-      window.location.href = '/login'
-      return Promise.reject(new Error(res.msg))
-    }
-    if (res.code !== 200) {
+    if (res.code !== 1) {
       ElMessage.error(res.msg || '请求失败')
-      return Promise.reject(new Error(res.msg))
+      return Promise.reject(new Error(res.msg || '请求失败'))
     }
     return response
   },
   (error) => {
+    // 优先提取后端返回的错误消息
+    const serverMsg = error.response?.data?.msg
+    if (serverMsg) {
+      ElMessage.error(serverMsg)
+      return Promise.reject(new Error(serverMsg))
+    }
+    // 网络超时或无法连接
+    if (error.code === 'ECONNABORTED') {
+      ElMessage.error('请求超时，请稍后重试')
+      return Promise.reject(error)
+    }
+    if (!error.response) {
+      ElMessage.error('网络连接失败，请检查后端服务是否启动')
+      console.error('[API] 网络错误:', error.message, '\n请确认后端服务运行在 http://localhost:8080')
+      return Promise.reject(error)
+    }
     ElMessage.error(error.message || '网络错误')
     return Promise.reject(error)
   }

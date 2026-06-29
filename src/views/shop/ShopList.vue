@@ -1,6 +1,6 @@
 <template>
   <div class="page-container">
-    <h2 class="page-title">商家展示</h2>
+    <h2 class="page-title">商户展示</h2>
 
     <!-- 筛选区域 -->
     <div class="filter-section card-wrapper">
