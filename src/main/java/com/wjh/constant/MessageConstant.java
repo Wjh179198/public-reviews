@@ -1,0 +1,12 @@
+package com.wjh.constant;
+
+
+public class MessageConstant {
+
+    public static final String PHONE_REGEX_ERROR = "手机号码格式不正确";
+    public static final String PHONE_CODE = "发送验证码成功";
+    public static final String CONFIRM_PASSWORD_ERROR = "两次输入的密码不一致";
+    public static final String CODE_ERROR = "验证码错误";
+    public static final String PHONE_EXIST = "该手机号已注册";
+
+}
