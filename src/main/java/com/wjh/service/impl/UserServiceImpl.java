@@ -8,6 +8,7 @@ import com.wjh.context.BaseContext;
 import com.wjh.dto.UserDTO;
 import com.wjh.dto.UserLoginDTO;
 import com.wjh.dto.UserRegisterDTO;
+import com.wjh.dto.UserUpdateDTO;
 import com.wjh.entity.User;
 import com.wjh.mapper.UserMapper;
 import com.wjh.properties.JwtProperties;
@@ -21,6 +22,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.DigestUtils;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -76,7 +78,7 @@ public class UserServiceImpl implements UserService {
             return Result.error(MessageConstant.PHONE_EXIST);
         }
         user.setName(UUID.randomUUID().toString());
-        user.setPassword(userRegisterDTO.getPassword());
+        user.setPassword(DigestUtils.md5DigestAsHex(userRegisterDTO.getPassword().getBytes()));
         user.setCreateTime(LocalDateTime.now());
         user.setUpdateTime(LocalDateTime.now());
         userMapper.insert(user);
@@ -96,7 +98,7 @@ public class UserServiceImpl implements UserService {
         if(user1 == null) {
             return Result.error(MessageConstant.PHONE_NOT_EXIST);
         }
-        if(!user1.getPassword().equals(userLoginDTO.getPassword())) {
+        if(!user1.getPassword().equals(DigestUtils.md5DigestAsHex(userLoginDTO.getPassword().getBytes()))) {
             return Result.error(MessageConstant.PASSWORD_ERROR);
         }
         String token = UUID.randomUUID().toString() + user1.getId();
@@ -149,5 +151,26 @@ public class UserServiceImpl implements UserService {
         user1.setId(userDTO.getId());
         User user = userMapper.selectByParams(user1);
         return Result.success(user);
+    }
+
+    @Override
+    public User update(UserUpdateDTO userUpdateDT) {
+        User user = new User();
+        user.setId(BaseContext.getThreadLocal().getId());
+        User user1 = userMapper.selectByParams(user);
+        if(user1 == null) {
+            throw new RuntimeException(MessageConstant.USER_NOT_EXISTS);
+        }
+        if(userUpdateDT.getName() != null && !userUpdateDT.getName().isEmpty()) {
+            user1.setName(userUpdateDT.getName());
+        }
+        if(userUpdateDT.getAddress() != null && !userUpdateDT.getAddress().isEmpty()) {
+            user1.setAddress(userUpdateDT.getAddress());
+        }
+        if(userUpdateDT.getImage() != null && !userUpdateDT.getImage().isEmpty()) {
+            user1.setImage(userUpdateDT.getImage());
+        }
+        userMapper.update(user1);
+        return user1;
     }
 }

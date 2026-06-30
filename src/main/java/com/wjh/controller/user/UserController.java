@@ -4,6 +4,7 @@ package com.wjh.controller.user;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.wjh.dto.UserLoginDTO;
 import com.wjh.dto.UserRegisterDTO;
+import com.wjh.dto.UserUpdateDTO;
 import com.wjh.entity.User;
 import com.wjh.result.Result;
 import com.wjh.service.UserService;
@@ -40,5 +41,11 @@ public class UserController {
     @GetMapping("/info")
     public Result<User> getInfo () {
         return userService.getInfo();
+    }
+
+    @PutMapping("/update")
+    public Result<User> update (@RequestBody UserUpdateDTO userUpdateDTO) {
+        User user = userService.update(userUpdateDTO);
+        return Result.success(user);
     }
 }

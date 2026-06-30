@@ -21,7 +21,7 @@ public class User implements Serializable {
     private Long id;
     private String name;
     private String phone;
-    private String images;
+    private String image;
     private String password;
     private Integer fansCounts;
     private Integer followerCounts;
@@ -31,5 +31,6 @@ public class User implements Serializable {
     private Long shopId;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
+
 
 }

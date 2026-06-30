@@ -11,4 +11,5 @@ public class MessageConstant {
     public static final String PHONE_NOT_EXIST = "该手机号未注册";
     public static final String PASSWORD_ERROR = "密码错误";
     public static final String PHONE_ISNULL = "手机号码不能为空";
+    public static final String USER_NOT_EXISTS = "用户不存在";
 }
