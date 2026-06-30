@@ -25,8 +25,8 @@ public class RedisReflashInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String token = request.getHeader("Authorization");
-        if(token == null || token.isEmpty()) {
-            return true;
+        if (token != null && token.startsWith("Bearer ")) {
+            token = token.substring(7);  // 去掉 "Bearer " 前缀
         }
         String json = stringRedisTemplate.opsForValue().get(RedisConstant.USER_LOGIN_KEY + token);
         if(json == null || json.isEmpty()) {

@@ -1,5 +1,6 @@
 package com.wjh.result;
 
+import com.wjh.entity.User;
 import lombok.Data;
 
 import java.io.Serializable;

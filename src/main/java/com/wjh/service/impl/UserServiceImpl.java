@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wjh.constant.MessageConstant;
 import com.wjh.constant.RedisConstant;
+import com.wjh.context.BaseContext;
 import com.wjh.dto.UserDTO;
 import com.wjh.dto.UserLoginDTO;
 import com.wjh.dto.UserRegisterDTO;
@@ -59,7 +60,6 @@ public class UserServiceImpl implements UserService {
     public Result register(UserRegisterDTO userRegisterDTO) {
         String phone = userRegisterDTO.getPhone();
         if(!phone.matches(PHONE_REGEX)) {
-            log.info("手机号码格式不正确");
             return Result.error(MessageConstant.PHONE_REGEX_ERROR);
         }
         if(!userRegisterDTO.getPassword().equals(userRegisterDTO.getConfirmPassword())) {
@@ -86,8 +86,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Result loginByPassword(UserLoginDTO userLoginDTO) throws JsonProcessingException {
+        String phone = userLoginDTO.getPhone();
+        if(!phone.matches(PHONE_REGEX)) {
+            return Result.error(MessageConstant.PHONE_REGEX_ERROR);
+        }
         User user = new User();
-        user.setPhone(userLoginDTO.getPhone());
+        user.setPhone(phone);
         User user1 = userMapper.selectByParams(user);
         if(user1 == null) {
             return Result.error(MessageConstant.PHONE_NOT_EXIST);
@@ -100,6 +104,7 @@ public class UserServiceImpl implements UserService {
         UserDTO userDTO = new UserDTO();
         BeanUtils.copyProperties(user1, userDTO);
         stringRedisTemplate.opsForValue().set(key, objectMapper.writeValueAsString(userDTO), RedisConstant.USER_LOGIN_EXPIRE, TimeUnit.SECONDS);
+        user1.setPassword(null);
         return Result.success(new LoginUserVO(token, user1));
     }
 
@@ -108,6 +113,9 @@ public class UserServiceImpl implements UserService {
         String phone = userLoginDTO.getPhone();
         if(phone == null) {
             return Result.error(MessageConstant.PHONE_ISNULL);
+        }
+        if(!phone.matches(PHONE_REGEX)) {
+            return Result.error(MessageConstant.PHONE_REGEX_ERROR);
         }
         User user = new User();
         user.setPhone(phone);
@@ -129,6 +137,17 @@ public class UserServiceImpl implements UserService {
             log.info("出现异常: {}", e.getMessage());
             throw new RuntimeException(e);
         }
+        stringRedisTemplate.delete(key);
+        user1.setPassword(null);
         return Result.success(new LoginUserVO(token, user1));
+    }
+
+    @Override
+    public Result<User> getInfo() {
+        UserDTO userDTO = BaseContext.getThreadLocal();
+        User user1 = new User();
+        user1.setId(userDTO.getId());
+        User user = userMapper.selectByParams(user1);
+        return Result.success(user);
     }
 }
