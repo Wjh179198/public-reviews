@@ -194,4 +194,17 @@ public class UserServiceImpl implements UserService {
         return userVOList;
     }
 
+    @Override
+    public UserVO getOtherUser(Long userId) {
+        User user = new User();
+        user.setId(userId);
+        User user1 = userMapper.selectByParams(user);
+        if(user1 == null) {
+            throw new RuntimeException(MessageConstant.USER_NOT_EXISTS);
+        }
+        UserVO userVO = new UserVO();
+        BeanUtils.copyProperties(user1, userVO);
+        return userVO;
+    }
+
 }

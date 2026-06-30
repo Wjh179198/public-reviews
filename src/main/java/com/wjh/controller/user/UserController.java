@@ -57,4 +57,10 @@ public class UserController {
         List<UserVO> userVOList = userService.searchUser(keyword);
         return Result.success(userVOList);
     }
+
+    @GetMapping("/{userId}")
+    public Result<UserVO> getOtherUser (@PathVariable Long userId) {
+        UserVO userVo = userService.getOtherUser(userId);
+        return Result.success(userVo);
+    }
 }
