@@ -55,7 +55,7 @@ public class UserServiceImpl implements UserService {
         String code = CodeUtil.getCode();
         stringRedisTemplate.opsForValue().set(key, code, RedisConstant.SMS_CODE_EXPIRE, TimeUnit.SECONDS);
         log.info(MessageConstant.PHONE_CODE + "验证码: {}", code);
-        return Result.success();
+        return Result.success("验证码已发送");
     }
 
     @Override
@@ -83,6 +83,8 @@ public class UserServiceImpl implements UserService {
         user.setUpdateTime(LocalDateTime.now());
         userMapper.insert(user);
         stringRedisTemplate.delete(key);
+        stringRedisTemplate.opsForSet().add(RedisConstant.USER_FOLLOW_KEY + user.getId().toString(), "0");
+        stringRedisTemplate.opsForSet().add(RedisConstant.USER_FAN_KEY + user.getId().toString(), "0");
         return Result.success("注册成功");
     }
 
@@ -107,7 +109,7 @@ public class UserServiceImpl implements UserService {
         BeanUtils.copyProperties(user1, userDTO);
         stringRedisTemplate.opsForValue().set(key, objectMapper.writeValueAsString(userDTO), RedisConstant.USER_LOGIN_EXPIRE, TimeUnit.SECONDS);
         user1.setPassword(null);
-        return Result.success(new LoginUserVO(token, user1));
+        return Result.success(MessageConstant.LOGIN_SUCCESS, new LoginUserVO(token, user1));
     }
 
     @Override
@@ -141,7 +143,7 @@ public class UserServiceImpl implements UserService {
         }
         stringRedisTemplate.delete(key);
         user1.setPassword(null);
-        return Result.success(new LoginUserVO(token, user1));
+        return Result.success(MessageConstant.LOGIN_SUCCESS, new LoginUserVO(token, user1));
     }
 
     @Override
@@ -157,9 +159,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User update(UserUpdateDTO userUpdateDT) {
-        User user = new User();
-        user.setId(BaseContext.getThreadLocal().getId());
-        User user1 = userMapper.selectByParams(user);
+        User user1 = userMapper.getById(BaseContext.getThreadLocal().getId());
         if(user1 == null) {
             throw new RuntimeException(MessageConstant.USER_NOT_EXISTS);
         }
@@ -196,9 +196,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserVO getOtherUser(Long userId) {
-        User user = new User();
-        user.setId(userId);
-        User user1 = userMapper.selectByParams(user);
+        User user1 = userMapper.getById(userId);
         if(user1 == null) {
             throw new RuntimeException(MessageConstant.USER_NOT_EXISTS);
         }
