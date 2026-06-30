@@ -17,6 +17,7 @@ import com.wjh.service.UserService;
 import com.wjh.utils.CodeUtil;
 import com.wjh.utils.JwtUtil;
 import com.wjh.vo.LoginUserVO;
+import com.wjh.vo.UserVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,10 +26,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -150,6 +150,8 @@ public class UserServiceImpl implements UserService {
         User user1 = new User();
         user1.setId(userDTO.getId());
         User user = userMapper.selectByParams(user1);
+        user.setPassword(null);
+        user.setShopId(null);
         return Result.success(user);
     }
 
@@ -173,4 +175,23 @@ public class UserServiceImpl implements UserService {
         userMapper.update(user1);
         return user1;
     }
+
+    @Override
+    public List<UserVO> searchUser(String keyword) {
+        if(keyword == null || keyword.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<User> userList = userMapper.getListByName(keyword);
+        List<UserVO> userVOList = userList.stream().map(user -> UserVO.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .image(user.getImage())
+                .address(user.getAddress())
+                .fansCounts(user.getFansCounts())
+                .followerCounts(user.getFollowerCounts())
+                .status(user.getStatus())
+                .build()).collect(Collectors.toList());
+        return userVOList;
+    }
+
 }

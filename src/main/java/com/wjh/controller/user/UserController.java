@@ -8,8 +8,11 @@ import com.wjh.dto.UserUpdateDTO;
 import com.wjh.entity.User;
 import com.wjh.result.Result;
 import com.wjh.service.UserService;
+import com.wjh.vo.UserVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/user")
@@ -47,5 +50,11 @@ public class UserController {
     public Result<User> update (@RequestBody UserUpdateDTO userUpdateDTO) {
         User user = userService.update(userUpdateDTO);
         return Result.success(user);
+    }
+
+    @GetMapping("/search")
+    public Result<List<UserVO>> searchUser (@RequestParam("keyword") String keyword) {
+        List<UserVO> userVOList = userService.searchUser(keyword);
+        return Result.success(userVOList);
     }
 }

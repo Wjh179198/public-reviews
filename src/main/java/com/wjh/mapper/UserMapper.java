@@ -4,6 +4,8 @@ import com.wjh.entity.User;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 @Mapper
 public interface UserMapper {
 
@@ -13,4 +15,6 @@ public interface UserMapper {
     void insert(User user);
 
     void update(User user);
+
+    List<User> getListByName(String name);
 }

@@ -6,6 +6,9 @@ import com.wjh.dto.UserRegisterDTO;
 import com.wjh.dto.UserUpdateDTO;
 import com.wjh.entity.User;
 import com.wjh.result.Result;
+import com.wjh.vo.UserVO;
+
+import java.util.List;
 
 public interface UserService {
     Result sendCode(UserLoginDTO userLoginDTO);
@@ -19,4 +22,7 @@ public interface UserService {
     Result<User> getInfo();
 
     User update(UserUpdateDTO userUpdateDTO);
+
+    List<UserVO> searchUser(String keyword);
+
 }
