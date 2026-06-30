@@ -8,7 +8,7 @@ public class CodeUtil {
         Random r = new Random();
         for(int i = 0; i < 6; i++) {
             int num = r.nextInt(10);
-            sb.append(num + '0');
+            sb.append(num);
         }
         return sb.toString();
     }
