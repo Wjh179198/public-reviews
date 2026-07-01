@@ -205,4 +205,10 @@ public class UserServiceImpl implements UserService {
         return userVO;
     }
 
+    @Override
+    public Boolean checkIsFollow(Long userId) {
+        Boolean res  = stringRedisTemplate.opsForSet().isMember(RedisConstant.USER_FAN_KEY + userId.toString(), BaseContext.getThreadLocal().getId().toString());
+        return res;
+    }
+
 }

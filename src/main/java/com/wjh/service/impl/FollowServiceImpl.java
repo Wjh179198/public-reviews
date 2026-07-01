@@ -10,9 +10,11 @@ import com.wjh.mapper.UserMapper;
 import com.wjh.result.Result;
 import com.wjh.service.FollowService;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.connection.stream.*;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,6 +45,7 @@ public class FollowServiceImpl implements FollowService {
     private FollowServiceImpl self;
 
     private static final ExecutorService FOLLOW_EXECUTOR = Executors.newSingleThreadExecutor();
+    private volatile boolean running = true;
 
     @PostConstruct
     public void init () {
@@ -53,11 +57,25 @@ public class FollowServiceImpl implements FollowService {
         FOLLOW_EXECUTOR.submit(new FollowTask());
     }
 
+    @PreDestroy
+    public void destroy () {
+        running = false;
+        FOLLOW_EXECUTOR.shutdown();
+        try {
+            if (!FOLLOW_EXECUTOR.awaitTermination(5, TimeUnit.SECONDS)) {
+                FOLLOW_EXECUTOR.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            FOLLOW_EXECUTOR.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+    }
+
     private class FollowTask implements Runnable {
 
         @Override
         public void run() {
-            while (true) {
+            while (running) {
                 try {
                     List<MapRecord<String, Object, Object>> msg = stringRedisTemplate.opsForStream().read(
                             Consumer.from("follow_group", "follow_consumer"),
@@ -68,8 +86,11 @@ public class FollowServiceImpl implements FollowService {
                         continue;
                     }
                     self.handleFollow(msg);
+                } catch (RedisConnectionFailureException e) {
+                    log.warn("Redis 连接失败，稍后重试", e);
+                    sleep(5);
                 } catch (Exception e) {
-                    while (true) {
+                    while (running) {
                         try {
                             List<MapRecord<String, Object, Object>> msg = stringRedisTemplate.opsForStream().read(
                                     Consumer.from("follow_group", "follow_consumer"),
@@ -80,11 +101,24 @@ public class FollowServiceImpl implements FollowService {
                                 break;
                             }
                             self.handleFollow(msg);
+                        } catch (RedisConnectionFailureException ex) {
+                            log.warn("Redis 连接失败，稍后重试", ex);
+                            sleep(5);
+                            break;
                         } catch (Exception ex) {
                             log.error("处理关注消息失败", ex);
                         }
                     }
                 }
+            }
+        }
+
+        private void sleep(long seconds) {
+            try {
+                Thread.sleep(seconds * 1000);
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                running = false;
             }
         }
     }

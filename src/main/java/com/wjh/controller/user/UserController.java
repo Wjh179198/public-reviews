@@ -63,4 +63,11 @@ public class UserController {
         UserVO userVo = userService.getOtherUser(userId);
         return Result.success(userVo);
     }
+
+    @GetMapping("/follow/check/{userId}")
+    public Result<Boolean> checkIsFollow (@PathVariable Long userId) {
+        Boolean isFollow = userService.checkIsFollow(userId);
+        return Result.success(isFollow);
+    }
+
 }

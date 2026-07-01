@@ -26,4 +26,6 @@ public interface UserService {
     List<UserVO> searchUser(String keyword);
 
     UserVO getOtherUser(Long userId);
+
+    Boolean checkIsFollow(Long userId);
 }
