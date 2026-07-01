@@ -7,4 +7,6 @@ public class RedisConstant {
     public static final Long USER_LOGIN_EXPIRE = 60L * 60L * 2L;
     public static final String USER_FOLLOW_KEY = "user:follow";
     public static final String USER_FAN_KEY = "user:fan";
+    public static final String SHOP_TYPE_KEY = "shop:type";
+    public static final Long SHOP_TYPE_EXPIRE = 60L * 60L * 24L;
 }

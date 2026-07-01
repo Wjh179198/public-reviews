@@ -13,4 +13,8 @@ public class MessageConstant {
     public static final String PHONE_ISNULL = "手机号码不能为空";
     public static final String USER_NOT_EXISTS = "用户不存在";
     public static final String LOGIN_SUCCESS = "登录成功";
+    public static final String RECHARGE_AMOUNT_ERROR = "充值金额必须大于0";
+    public static final String RECHARGE_SUCCESS = "充值成功";
+
+    public static final String RECHARGE_FAIL = "充值失败,请稍后重试";
 }
