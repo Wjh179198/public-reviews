@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.wjh.dto.UserLoginDTO;
 import com.wjh.dto.UserRegisterDTO;
 import com.wjh.dto.UserUpdateDTO;
+import com.wjh.dto.rechargeDTO;
 import com.wjh.entity.User;
 import com.wjh.result.PageResult;
 import com.wjh.result.Result;
@@ -13,6 +14,7 @@ import com.wjh.vo.UserVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -84,8 +86,13 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/common-follows")
-    public Result<PageResult> commonFollowsList (@PathVariable Long userId) {
-        PageResult pageResult = userService.getCommonFollowsList(userId);
-        return Result.success(pageResult);
+    public Result<List<UserVO>> commonFollowsList (@PathVariable Long userId) {
+        List<UserVO> userVOList = userService.getCommonFollowsList(userId);
+        return Result.success(userVOList);
+    }
+
+    @PostMapping("/recharge")
+    public Result recharge (@RequestBody rechargeDTO rechargeDTO) {
+        return userService.recharge(rechargeDTO);
     }
 }

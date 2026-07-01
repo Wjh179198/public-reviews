@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.wjh.dto.UserLoginDTO;
 import com.wjh.dto.UserRegisterDTO;
 import com.wjh.dto.UserUpdateDTO;
+import com.wjh.dto.rechargeDTO;
 import com.wjh.entity.User;
 import com.wjh.result.PageResult;
 import com.wjh.result.Result;
@@ -34,5 +35,8 @@ public interface UserService {
 
     PageResult getFollowingsList(Long userId, Integer page, Integer pageSize);
 
-    PageResult getCommonFollowsList(Long userId);
+    List<UserVO> getCommonFollowsList (Long userId);
+
+    Result recharge(rechargeDTO rechargeDTO);
+
 }
