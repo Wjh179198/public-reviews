@@ -62,7 +62,7 @@ async function fetchOrders() {
       1,
       100
     )
-    orders.value = result.list
+    orders.value = result.records
   } catch { /* ignore */ } finally {
     loading.value = false
   }

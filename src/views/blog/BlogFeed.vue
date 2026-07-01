@@ -53,7 +53,7 @@ async function fetchBlogs() {
       page: page.value,
       pageSize: pageSize.value,
     })
-    blogs.value = result.list
+    blogs.value = result.records
     total.value = result.total
   } catch { /* ignore */ } finally {
     loading.value = false

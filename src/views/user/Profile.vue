@@ -117,7 +117,7 @@ async function fetchBlogs() {
   if (!user.value) return
   try {
     const result = await getUserBlogs(user.value.id, 1, 100)
-    myBlogs.value = result.list
+    myBlogs.value = result.records
   } catch { /* ignore */ }
 }
 
@@ -125,7 +125,7 @@ async function fetchFans() {
   fansLoading.value = true
   try {
     const result = await getFans(user.value.id, 1, 100)
-    fans.value = result.list
+    fans.value = result.records
   } catch { /* ignore */ } finally {
     fansLoading.value = false
   }
@@ -135,7 +135,7 @@ async function fetchFollows() {
   followsLoading.value = true
   try {
     const result = await getFollowings(user.value.id, 1, 100)
-    follows.value = result.list
+    follows.value = result.records
   } catch { /* ignore */ } finally {
     followsLoading.value = false
   }

@@ -95,7 +95,7 @@ async function fetchShops() {
       page: page.value,
       pageSize: pageSize.value,
     })
-    shopList.value = result.list
+    shopList.value = result.records
     total.value = result.total
   } catch {
     // 错误已在拦截器中处理

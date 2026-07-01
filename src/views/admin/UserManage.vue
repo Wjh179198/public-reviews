@@ -154,7 +154,7 @@ async function fetchUsers() {
       page: query.page,
       pageSize: query.pageSize,
     })
-    users.value = result.list
+    users.value = result.records
     total.value = result.total
   } catch { /* ignore */ } finally {
     loading.value = false

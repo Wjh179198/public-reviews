@@ -92,7 +92,7 @@ async function searchShops(query: string) {
   shopLoading.value = true
   try {
     const result = await getShopList({ page: 1, pageSize: 20 })
-    shopOptions.value = result.list.filter((s) =>
+    shopOptions.value = result.records.filter((s) =>
       s.name.toLowerCase().includes(query.toLowerCase())
     )
   } catch { /* ignore */ } finally {

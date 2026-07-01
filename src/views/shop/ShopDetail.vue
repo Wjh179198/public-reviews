@@ -302,7 +302,7 @@ async function fetchComments() {
       page: commentPage.value,
       pageSize: 10,
     })
-    comments.value = result.list
+    comments.value = result.records
     commentTotal.value = result.total
   } catch { /* ignore */ } finally {
     commentLoading.value = false

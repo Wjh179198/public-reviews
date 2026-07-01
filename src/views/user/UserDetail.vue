@@ -123,7 +123,7 @@ async function fetchBlogs() {
   blogLoading.value = true
   try {
     const result = await getUserBlogs(userId.value, blogPage.value, 10)
-    blogs.value = result.list
+    blogs.value = result.records
     blogTotal.value = result.total
   } catch { /* ignore */ } finally {
     blogLoading.value = false

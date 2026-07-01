@@ -12,8 +12,8 @@ export interface PageParams {
 
 export interface PageResult<T> {
   total: number
-  list: T[]
-  page: number
+  records: T[]
+  pages: number
   pageSize: number
 }
 
