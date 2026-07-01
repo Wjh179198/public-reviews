@@ -6,6 +6,7 @@ import com.wjh.dto.UserLoginDTO;
 import com.wjh.dto.UserRegisterDTO;
 import com.wjh.dto.UserUpdateDTO;
 import com.wjh.entity.User;
+import com.wjh.result.PageResult;
 import com.wjh.result.Result;
 import com.wjh.service.UserService;
 import com.wjh.vo.UserVO;
@@ -70,4 +71,21 @@ public class UserController {
         return Result.success(isFollow);
     }
 
+    @GetMapping("/{userId}/fans")
+    public Result<PageResult> fansList (@PathVariable Long userId, @RequestParam Integer page, @RequestParam Integer pageSize) {
+        PageResult pageResult = userService.getFansList(userId, page, pageSize);
+        return Result.success(pageResult);
+    }
+
+    @GetMapping("/{userId}/followings")
+    public Result<PageResult> followingsList (@PathVariable Long userId, @RequestParam Integer page, @RequestParam Integer pageSize) {
+        PageResult pageResult = userService.getFollowingsList(userId, page, pageSize);
+        return Result.success(pageResult);
+    }
+
+    @GetMapping("/{userId}/common-follows")
+    public Result<PageResult> commonFollowsList (@PathVariable Long userId) {
+        PageResult pageResult = userService.getCommonFollowsList(userId);
+        return Result.success(pageResult);
+    }
 }

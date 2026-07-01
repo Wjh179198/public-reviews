@@ -20,4 +20,6 @@ public interface UserMapper {
 
     @Select("select * from user where id = #{id}")
     User getById(Long id);
+
+    List<User> getList(List<Long> ids);
 }

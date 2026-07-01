@@ -5,6 +5,7 @@ import com.wjh.dto.UserLoginDTO;
 import com.wjh.dto.UserRegisterDTO;
 import com.wjh.dto.UserUpdateDTO;
 import com.wjh.entity.User;
+import com.wjh.result.PageResult;
 import com.wjh.result.Result;
 import com.wjh.vo.UserVO;
 
@@ -28,4 +29,10 @@ public interface UserService {
     UserVO getOtherUser(Long userId);
 
     Boolean checkIsFollow(Long userId);
+
+    PageResult getFansList(Long userId, Integer page, Integer pageSize);
+
+    PageResult getFollowingsList(Long userId, Integer page, Integer pageSize);
+
+    PageResult getCommonFollowsList(Long userId);
 }
