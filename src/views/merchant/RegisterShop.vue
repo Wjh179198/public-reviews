@@ -23,10 +23,22 @@
           />
         </el-form-item>
 
-        <el-form-item label="地点" required>
+        <el-form-item label="所在地区" required>
+          <el-cascader
+            v-model="selectedRegion"
+            :options="chinaRegions"
+            :props="{ value: 'value', label: 'label', children: 'children' }"
+            placeholder="请选择省/市/区"
+            clearable
+            filterable
+            style="width: 100%"
+          />
+        </el-form-item>
+
+        <el-form-item label="详细地址" required>
           <el-input
-            v-model="form.address"
-            placeholder="请输入商家地址"
+            v-model="detailAddress"
+            placeholder="街道门牌号、楼层等详细信息"
             maxlength="100"
           />
         </el-form-item>
@@ -64,11 +76,15 @@ import { getShopTypes, registerShop } from '@/api/shop'
 import { useUserStore } from '@/stores/user'
 import type { ShopType } from '@/types'
 import ImageUploader from '@/components/ImageUploader.vue'
+import chinaRegions from '@/data/china-regions'
 
 const router = useRouter()
 const userStore = useUserStore()
 
 const shopTypes = ref<ShopType[]>([])
+
+const selectedRegion = ref<string[]>([])
+const detailAddress = ref('')
 
 const form = reactive({
   typeId: null as number | null,
@@ -79,6 +95,26 @@ const form = reactive({
 })
 
 const submitting = ref(false)
+
+// 将级联选择的 value 数组转为显示用 label 字符串
+function buildRegionLabel(path: string[]): string {
+  if (!path || path.length === 0) return ''
+  const province = chinaRegions.find((r) => r.value === path[0])
+  const provinceLabel = province?.label || path[0]
+  let result = provinceLabel
+  if (path.length >= 2 && province?.children) {
+    const city = province.children.find((c) => c.value === path[1])
+    result += ' ' + (city?.label || path[1])
+  }
+  if (path.length >= 3 && province?.children) {
+    const city = province.children.find((c) => c.value === path[1])
+    if (city?.children) {
+      const district = city.children.find((d) => d.value === path[2])
+      result += ' ' + (district?.label || path[2])
+    }
+  }
+  return result
+}
 
 onMounted(async () => {
   if (userStore.isMerchant) {
@@ -100,14 +136,24 @@ async function handleSubmit() {
     ElMessage.warning('请输入商家名称')
     return
   }
-  if (!form.address.trim()) {
-    ElMessage.warning('请输入商家地址')
+  if (!selectedRegion.value || selectedRegion.value.length === 0) {
+    ElMessage.warning('请选择所在地区')
+    return
+  }
+  if (!detailAddress.value.trim()) {
+    ElMessage.warning('请填写详细地址')
     return
   }
   if (form.images.length === 0) {
     ElMessage.warning('请上传商家图片')
     return
   }
+
+  // 拼接：省/市/区 + 详细地址，如 "广东省 广州市 天河区 体育西路123号"
+  const regionLabel = buildRegionLabel(selectedRegion.value)
+  form.address = detailAddress.value.trim()
+    ? regionLabel + ' ' + detailAddress.value.trim()
+    : regionLabel
 
   submitting.value = true
   try {
@@ -119,7 +165,6 @@ async function handleSubmit() {
       images: form.images.join(','),
     })
     ElMessage.success('注册成功！')
-    // 刷新用户信息
     await userStore.fetchUser()
     router.push('/shop-manage')
   } catch { /* ignore */ } finally {

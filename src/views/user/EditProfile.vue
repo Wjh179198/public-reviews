@@ -84,34 +84,52 @@ onMounted(() => {
     form.phone = u.phone
     form.image = u.image || ''
 
-    // 从存储的地址字符串还原为级联数组
+    // 从存储的地址字符串还原为级联数组（支持省/市/区三级）
     if (u.address) {
       const parts = u.address.split(/\s+/).filter(Boolean)
-      if (parts.length >= 2) {
-        // 检查省名是否匹配
-        const province = chinaRegions.find(
-          (r) => r.label === parts[0] || r.value === parts[0]
-        )
-        if (province) {
-          selectedRegion.value = [province.value, parts[1] || parts[0]]
+      const province = chinaRegions.find(
+        (r) => r.label === parts[0] || r.value === parts[0]
+      )
+      if (province) {
+        const path = [province.value]
+        if (parts.length >= 2 && province.children) {
+          const city = province.children.find(
+            (c) => c.label === parts[1] || c.value === parts[1]
+          )
+          if (city) {
+            path.push(city.value)
+            if (parts.length >= 3 && city.children) {
+              const district = city.children.find(
+                (d) => d.label === parts[2] || d.value === parts[2]
+              )
+              if (district) {
+                path.push(district.value)
+              }
+            }
+          }
         }
-      } else if (parts.length === 1) {
-        selectedRegion.value = [parts[0]]
+        selectedRegion.value = path
       }
     }
   }
 })
 
-// 级联选择变化时同步到 form.address
+// 级联选择变化时同步到 form.address（省/市/区 label 拼接）
 watch(selectedRegion, (val) => {
   if (val && val.length > 0) {
-    // 找到对应的 label 显示名，存储为 "广东省 深圳市" 格式
     const province = chinaRegions.find((r) => r.value === val[0])
     const provinceLabel = province?.label || val[0]
     let address = provinceLabel
-    if (val.length >= 2) {
-      const city = province?.children?.find((c) => c.value === val[1])
+    if (val.length >= 2 && province?.children) {
+      const city = province.children.find((c) => c.value === val[1])
       address += ' ' + (city?.label || val[1])
+    }
+    if (val.length >= 3 && province?.children) {
+      const city = province.children.find((c) => c.value === val[1])
+      if (city?.children) {
+        const district = city.children.find((d) => d.value === val[2])
+        address += ' ' + (district?.label || val[2])
+      }
     }
     form.address = address
   } else {
