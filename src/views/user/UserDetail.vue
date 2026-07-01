@@ -150,6 +150,15 @@ async function handleToggleFollow() {
         user.value.fansCounts--
       }
     }
+    // 同步更新 store 中当前用户的关注数 + localStorage
+    if (userStore.userInfo) {
+      if (isFollowing.value) {
+        userStore.userInfo.followerCounts++
+      } else {
+        userStore.userInfo.followerCounts--
+      }
+      localStorage.setItem('user', JSON.stringify(userStore.userInfo))
+    }
     ElMessage.success(isFollowing.value ? '关注成功' : '已取消关注')
   } catch { /* ignore */ }
 }
