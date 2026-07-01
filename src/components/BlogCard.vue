@@ -37,7 +37,7 @@
     <div class="blog-footer">
       <span
         class="like-btn"
-        :class="{ liked: blog.isLiked }"
+        :class="{ liked: isLiked }"
         @click="$emit('like', blog.id)"
       >
         <el-icon><CaretTop /></el-icon>
@@ -56,6 +56,7 @@ import UserAvatar from './UserAvatar.vue'
 
 const props = defineProps<{
   blog: Blog
+  isLiked?: boolean
 }>()
 
 defineEmits<{

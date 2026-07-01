@@ -105,10 +105,10 @@
               <div class="review-footer">
                 <span
                   class="like-btn"
-                  :class="{ 'liked': c.isLiked }"
+                  :class="{ 'liked': likedCommentIds.has(c.id) }"
                   @click="handleLikeComment(c)"
                 >
-                  <el-icon><CaretTop v-if="c.isLiked" /><CaretTop v-else /></el-icon>
+                  <el-icon><CaretTop /></el-icon>
                   {{ c.likes }}
                 </span>
               </div>
@@ -199,7 +199,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import type { Shop, Voucher, Comment, VoucherOrder } from '@/types'
 import { getShopDetail } from '@/api/shop'
 import { getShopVouchers, grabVoucher, getUserVouchers } from '@/api/voucher'
-import { getComments, createComment, likeComment } from '@/api/comment'
+import { getComments, createComment, likeComment, checkCommentLikeStatus } from '@/api/comment'
 import { createOrder } from '@/api/order'
 import { useUserStore } from '@/stores/user'
 import { formatTime, parseImages } from '@/utils'
@@ -229,6 +229,7 @@ const activeTab = ref('info')
 
 // 评价相关
 const comments = ref<Comment[]>([])
+const likedCommentIds = ref<Set<number>>(new Set())
 const commentFilter = ref('all')
 const commentPage = ref(1)
 const commentTotal = ref(0)
@@ -304,6 +305,18 @@ async function fetchComments() {
     })
     comments.value = result.records
     commentTotal.value = result.total
+    // 批量检查点赞状态
+    const ids = comments.value.map(c => c.id)
+    if (ids.length > 0) {
+      const results = await Promise.allSettled(
+        ids.map(id => checkCommentLikeStatus(id))
+      )
+      const set = new Set<number>()
+      results.forEach((r, i) => {
+        if (r.status === 'fulfilled' && r.value) set.add(ids[i])
+      })
+      likedCommentIds.value = set
+    }
   } catch { /* ignore */ } finally {
     commentLoading.value = false
   }
@@ -331,13 +344,15 @@ async function handleGrabVoucher(voucher: Voucher) {
 async function handleLikeComment(comment: Comment) {
   try {
     await likeComment(comment.id)
-    if (comment.isLiked) {
+    const newSet = new Set(likedCommentIds.value)
+    if (newSet.has(comment.id)) {
       comment.likes--
-      comment.isLiked = false
+      newSet.delete(comment.id)
     } else {
       comment.likes++
-      comment.isLiked = true
+      newSet.add(comment.id)
     }
+    likedCommentIds.value = newSet
   } catch { /* ignore */ }
 }
 

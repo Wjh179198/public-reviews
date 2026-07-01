@@ -84,7 +84,6 @@ export interface Comment {
   score: number
   likes: number
   images: string
-  isLiked?: boolean
   createTime: string
 }
 
@@ -107,7 +106,6 @@ export interface Blog {
   title: string
   content: string
   images: string
-  isLiked?: boolean
   createTime: string
   updateTime: string
 }

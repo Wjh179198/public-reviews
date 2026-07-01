@@ -40,6 +40,7 @@
             v-for="blog in blogs"
             :key="blog.id"
             :blog="blog"
+            :is-liked="likedBlogIds.has(blog.id)"
             @like="handleLikeBlog"
           />
         </template>
@@ -85,7 +86,7 @@ import { ElMessage } from 'element-plus'
 import { Location } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { getUserDetail, followUser, checkFollowStatus, getCommonFollows, getUserBlogs } from '@/api/user'
-import { likeBlog } from '@/api/blog'
+import { likeBlog, checkBlogLikeStatus } from '@/api/blog'
 import { formatTime } from '@/utils'
 import type { UserSimple, Blog } from '@/types'
 import UserAvatar from '@/components/UserAvatar.vue'
@@ -100,6 +101,7 @@ const user = ref<UserSimple | null>(null)
 const isFollowing = ref(false)
 
 const blogs = ref<Blog[]>([])
+const likedBlogIds = ref<Set<number>>(new Set())
 const blogPage = ref(1)
 const blogTotal = ref(0)
 const blogLoading = ref(false)
@@ -125,6 +127,18 @@ async function fetchBlogs() {
     const result = await getUserBlogs(userId.value, blogPage.value, 10)
     blogs.value = result.records
     blogTotal.value = result.total
+    // 批量检查点赞状态
+    const ids = blogs.value.map(b => b.id)
+    if (ids.length > 0) {
+      const results = await Promise.allSettled(
+        ids.map(id => checkBlogLikeStatus(id))
+      )
+      const set = new Set<number>()
+      results.forEach((r, i) => {
+        if (r.status === 'fulfilled' && r.value) set.add(ids[i])
+      })
+      likedBlogIds.value = set
+    }
   } catch { /* ignore */ } finally {
     blogLoading.value = false
   }
@@ -167,15 +181,16 @@ async function handleLikeBlog(blogId: number) {
   try {
     await likeBlog(blogId)
     const blog = blogs.value.find((b) => b.id === blogId)
-    if (blog) {
-      if (blog.isLiked) {
-        blog.likes--
-        blog.isLiked = false
-      } else {
-        blog.likes++
-        blog.isLiked = true
-      }
+    if (!blog) return
+    const newSet = new Set(likedBlogIds.value)
+    if (newSet.has(blogId)) {
+      blog.likes--
+      newSet.delete(blogId)
+    } else {
+      blog.likes++
+      newSet.add(blogId)
     }
+    likedBlogIds.value = newSet
   } catch { /* ignore */ }
 }
 

@@ -17,3 +17,8 @@ export function createComment(data: FormData) {
 export function likeComment(commentId: number) {
   return post(`/comment/${commentId}/like`)
 }
+
+// 检查是否已点赞某条评价
+export function checkCommentLikeStatus(commentId: number) {
+  return get<boolean>(`/comment/like/check/${commentId}`)
+}

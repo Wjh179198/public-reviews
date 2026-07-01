@@ -13,6 +13,7 @@
           v-for="blog in blogs"
           :key="blog.id"
           :blog="blog"
+          :is-liked="likedBlogIds.has(blog.id)"
           @like="handleLike"
         />
       </template>
@@ -35,11 +36,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import type { Blog } from '@/types'
-import { getBlogs, likeBlog } from '@/api/blog'
+import { getBlogs, likeBlog, checkBlogLikeStatus } from '@/api/blog'
 import BlogCard from '@/components/BlogCard.vue'
 
 const activeTab = ref<'recommend' | 'following'>('recommend')
 const blogs = ref<Blog[]>([])
+const likedBlogIds = ref<Set<number>>(new Set())
 const loading = ref(false)
 const page = ref(1)
 const pageSize = ref(10)
@@ -55,24 +57,42 @@ async function fetchBlogs() {
     })
     blogs.value = result.records
     total.value = result.total
+    // 批量检查点赞状态
+    await fetchLikeStatuses()
   } catch { /* ignore */ } finally {
     loading.value = false
   }
+}
+
+async function fetchLikeStatuses() {
+  const ids = blogs.value.map(b => b.id)
+  if (ids.length === 0) return
+  const results = await Promise.allSettled(
+    ids.map(id => checkBlogLikeStatus(id))
+  )
+  const set = new Set<number>()
+  results.forEach((r, i) => {
+    if (r.status === 'fulfilled' && r.value) {
+      set.add(ids[i])
+    }
+  })
+  likedBlogIds.value = set
 }
 
 async function handleLike(blogId: number) {
   try {
     await likeBlog(blogId)
     const blog = blogs.value.find((b) => b.id === blogId)
-    if (blog) {
-      if (blog.isLiked) {
-        blog.likes--
-        blog.isLiked = false
-      } else {
-        blog.likes++
-        blog.isLiked = true
-      }
+    if (!blog) return
+    const newSet = new Set(likedBlogIds.value)
+    if (newSet.has(blogId)) {
+      blog.likes--
+      newSet.delete(blogId)
+    } else {
+      blog.likes++
+      newSet.add(blogId)
     }
+    likedBlogIds.value = newSet
   } catch { /* ignore */ }
 }
 
