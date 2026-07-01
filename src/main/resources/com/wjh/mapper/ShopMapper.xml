@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wjh.mapper.ShopMapper">
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO shop (type_id, name, address, images, price, create_time, update_time)
+        VALUES (#{typeId}, #{name}, #{address}, #{images}, #{price}, #{createTime}, #{updateTime})
+    </insert>
+</mapper>

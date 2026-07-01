@@ -4,14 +4,23 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wjh.constant.RedisConstant;
+import com.wjh.constant.UserStatusConstant;
+import com.wjh.context.BaseContext;
+import com.wjh.dto.ShopRegisterDTO;
+import com.wjh.entity.Shop;
 import com.wjh.entity.ShopType;
+import com.wjh.entity.User;
 import com.wjh.mapper.ShopMapper;
+import com.wjh.mapper.UserMapper;
 import com.wjh.service.ShopService;
 import com.wjh.vo.ShopTypeVO;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,6 +33,8 @@ public class ShopServiceImpl implements ShopService {
     private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private UserMapper userMapper;
 
     @Override
     public List<ShopTypeVO> getShopTypes() {
@@ -47,5 +58,26 @@ public class ShopServiceImpl implements ShopService {
             throw new RuntimeException(e);
         }
         return shopTypeVOList;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Shop registerShop(ShopRegisterDTO shopRegisterDTO) {
+        Shop shop = new Shop();
+        BeanUtils.copyProperties(shopRegisterDTO, shop);
+        shop.setCreateTime(LocalDateTime.now());
+        shop.setUpdateTime(LocalDateTime.now());
+        shopMapper.insert(shop);
+        User user = new User();
+        user.setId(BaseContext.getThreadLocal().getId());
+        user.setShopId(shop.getId());
+        user.setStatus(UserStatusConstant.SHOP_USER);
+        userMapper.update(user);
+        return shop;
+    }
+
+    @Override
+    public List<Shop> getListShopByPageParam(Long typeId, String scoreRange, Integer page, Integer pageSize) {
+
     }
 }
