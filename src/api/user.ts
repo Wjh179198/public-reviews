@@ -21,6 +21,11 @@ export function followUser(userId: number) {
   return post(`/user/follow/${userId}`)
 }
 
+// 检查是否已关注某用户
+export function checkFollowStatus(userId: number) {
+  return get<boolean>(`/user/follow/check/${userId}`)
+}
+
 // 获取粉丝列表
 export function getFans(userId: number, page: number, pageSize: number) {
   return get<PageResult<UserSimple>>(`/user/${userId}/fans`, { page, pageSize })

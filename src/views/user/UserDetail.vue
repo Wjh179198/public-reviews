@@ -84,7 +84,7 @@ import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Location } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
-import { getUserDetail, followUser, getCommonFollows, getUserBlogs } from '@/api/user'
+import { getUserDetail, followUser, checkFollowStatus, getCommonFollows, getUserBlogs } from '@/api/user'
 import { likeBlog } from '@/api/blog'
 import { formatTime } from '@/utils'
 import type { UserSimple, Blog } from '@/types'
@@ -110,7 +110,12 @@ const commonLoading = ref(false)
 async function fetchUser() {
   try {
     user.value = await getUserDetail(userId.value)
-    isFollowing.value = user.value?.isFollowed ?? false
+  } catch { /* ignore */ }
+}
+
+async function fetchFollowStatus() {
+  try {
+    isFollowing.value = await checkFollowStatus(userId.value)
   } catch { /* ignore */ }
 }
 
@@ -167,6 +172,7 @@ async function handleLikeBlog(blogId: number) {
 
 onMounted(() => {
   fetchUser()
+  fetchFollowStatus()
   fetchBlogs()
   fetchCommonFollows()
 })
