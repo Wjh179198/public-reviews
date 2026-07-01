@@ -42,6 +42,7 @@ export interface UserSimple {
   fansCounts: number
   followerCounts: number
   status: number
+  isFollowed?: boolean
 }
 
 // ==================== 店铺类型 ====================

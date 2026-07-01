@@ -110,7 +110,7 @@ const commonLoading = ref(false)
 async function fetchUser() {
   try {
     user.value = await getUserDetail(userId.value)
-    // Check if current user follows this user via store state or checking
+    isFollowing.value = user.value?.isFollowed ?? false
   } catch { /* ignore */ }
 }
 
