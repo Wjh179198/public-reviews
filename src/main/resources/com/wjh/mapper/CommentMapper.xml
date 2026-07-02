@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wjh.mapper.CommentMapper">
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into comment (shop_id, user_id, content, score, images, create_time)
+        values (#{id}, #{shopId}, #{userId}, #{content}, #{score}, #{images}, #{createTime})
+    </insert>
+    <select id="getCommentsByPage" resultType="com.wjh.entity.Comment">
+        select * from comments
+        <where>
+            <if test="shopId != null">
+                and shop_id = #{shopId}
+            </if>
+            <if test="lowScore != null">
+                and score &gt;= #{lowScore}
+            </if>
+            <if test="highScore != null">
+                and score &lt;= #{highScore}
+            </if>
+        </where>
+    </select>
+</mapper>

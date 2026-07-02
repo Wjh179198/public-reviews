@@ -2,9 +2,11 @@ package com.wjh.controller.user;
 
 import com.wjh.dto.ShopRegisterDTO;
 import com.wjh.entity.Shop;
+import com.wjh.result.PageResult;
 import com.wjh.result.Result;
 import com.wjh.service.ShopService;
 import com.wjh.vo.ShopTypeVO;
+import com.wjh.vo.ShopVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,8 +33,20 @@ public class ShopController {
     }
 
     @GetMapping("/list")
-    public Result<List<Shop>> getListShopByPageParam (@RequestParam Long typeId, @RequestParam String scoreRange, @RequestParam Integer page, @RequestParam Integer pageSize) {
-        List<Shop> shopList = shopService.getListShopByPageParam(typeId, scoreRange, page, pageSize);
-        return Result.success(shopList);
+    public Result<PageResult> getListShopByPageParam (@RequestParam(required = false) Long typeId, @RequestParam(required = false) String scoreRange, @RequestParam Integer page, @RequestParam Integer pageSize) {
+        PageResult pageResult = shopService.getListShopByPageParam(typeId, scoreRange, page, pageSize);
+        return Result.success(pageResult);
+    }
+
+    @GetMapping("/{shopId}")
+    public Result<ShopVO> getShopById (@PathVariable Long shopId) {
+        ShopVO shopVO = shopService.getShopById(shopId);
+        return Result.success(shopVO);
+    }
+
+    @GetMapping("/search")
+    public Result<List<ShopVO>> searchShops(@RequestParam String keyword) {
+        List<ShopVO> shopVOList = shopService.searchShops(keyword);
+        return Result.success(shopVOList);
     }
 }

@@ -7,4 +7,64 @@
         INSERT INTO shop (type_id, name, address, images, price, create_time, update_time)
         VALUES (#{typeId}, #{name}, #{address}, #{images}, #{price}, #{createTime}, #{updateTime})
     </insert>
+    <select id="selectWithNoComment" resultType="com.wjh.vo.ShopVO">
+        select s.*, st.name as type_name from shop s
+        left join shop_type st on s.type_id = st.id
+        <where>
+            <if test="typeId != null">
+                and type_id = #{typeId}
+            </if>
+        </where>
+        and comments = 0
+    </select>
+    <select id="getListByPageParam" resultType="com.wjh.vo.ShopVO">
+        select s.*, st.name as type_name from shop s
+        left join shop_type st on s.type_id = st.id
+        <where>
+            <if test="typeId != null">
+                and type_id = #{typeId}
+            </if>
+            <if test="lowScore != null">
+                and score &gt;= #{lowScore}
+            </if>
+            <if test="highScore != null">
+                and score &lt;= #{highScore}
+            </if>
+        </where>
+    </select>
+    <select id="getListByName" resultType="com.wjh.vo.ShopVO">
+        select s.*, st.name as type_name from shop s
+        left join shop_type st on s.type_id = st.id
+        where s.name like CONCAT('%', #{keyword}, '%')
+    </select>
+    <update id="update">
+        update shop
+        <set>
+            <if test="typeId != null">
+                type_id = #{typeId},
+            </if>
+            <if test="name != null and name != ''">
+                name = #{name},
+            </if>
+            <if test="images != null and images != ''">
+                images = #{images},
+            </if>
+            <if test="address != null and address != ''">
+                address = #{address},
+            </if>
+            <if test="price != null">
+                price = #{price},
+            </if>
+            <if test="comments != null">
+                comments = #{comments},
+            </if>
+            <if test="sold != null">
+                sold = #{sold},
+            </if>
+            <if test="score != null">
+                score = #{score},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
 </mapper>

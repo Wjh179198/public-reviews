@@ -1,8 +1,9 @@
 package com.wjh.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.wjh.constant.RedisConstant;
 import com.wjh.constant.UserStatusConstant;
 import com.wjh.context.BaseContext;
@@ -12,14 +13,17 @@ import com.wjh.entity.ShopType;
 import com.wjh.entity.User;
 import com.wjh.mapper.ShopMapper;
 import com.wjh.mapper.UserMapper;
+import com.wjh.result.PageResult;
 import com.wjh.service.ShopService;
 import com.wjh.vo.ShopTypeVO;
+import com.wjh.vo.ShopVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -77,7 +81,38 @@ public class ShopServiceImpl implements ShopService {
     }
 
     @Override
-    public List<Shop> getListShopByPageParam(Long typeId, String scoreRange, Integer page, Integer pageSize) {
+    public PageResult getListShopByPageParam(Long typeId, String scoreRange, Integer page, Integer pageSize) {
+        PageHelper.startPage(page, pageSize);
+        BigDecimal lowScore = BigDecimal.valueOf(0);
+        BigDecimal highScore = BigDecimal.valueOf(5);
+        if(scoreRange != null && !scoreRange.isEmpty()) {
+            if("below2".equals(scoreRange)) {
+                highScore = BigDecimal.valueOf(2);
+            } else if("2to4".equals(scoreRange)) {
+                lowScore = BigDecimal.valueOf(2);
+                highScore = BigDecimal.valueOf(4);
+            } else if("4to5".equals(scoreRange)) {
+                lowScore = BigDecimal.valueOf(4);
+                highScore = BigDecimal.valueOf(5);
+            } else {
+                List<ShopVO> shopList = shopMapper.selectWithNoComment(typeId);
+                Page<ShopVO> shopPage = (Page<ShopVO>) shopList;
+                return PageResult.builder().total(shopPage.getTotal()).records(shopPage.getResult()).pages(shopPage.getPages()).pageSize(shopPage.getPageSize()).build();
+            }
+        }
+        List<ShopVO> shopList = shopMapper.getListByPageParam(typeId, lowScore, highScore);
+        Page<ShopVO> shopPage = (Page<ShopVO>) shopList;
+        return PageResult.builder().total(shopPage.getTotal()).records(shopPage.getResult()).pages(shopPage.getPages()).pageSize(shopPage.getPageSize()).build();
+    }
 
+    @Override
+    public ShopVO getShopById(Long shopId) {
+        return shopMapper.getShopVoById(shopId);
+    }
+
+    @Override
+    public List<ShopVO> searchShops(String keyword) {
+        List<ShopVO> shopVOList = shopMapper.getListByName(keyword);
+        return shopVOList;
     }
 }
