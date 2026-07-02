@@ -368,12 +368,12 @@ async function handleSubmitReview() {
   }
   submitting.value = true
   try {
-    const formData = new FormData()
-    formData.append('shopId', String(shopId.value))
-    formData.append('content', reviewContent.value)
-    formData.append('score', String(reviewScore.value))
-    formData.append('images', reviewImages.value.join(','))
-    await createComment(formData)
+    await createComment({
+      shopId: shopId.value,
+      content: reviewContent.value,
+      score: reviewScore.value,
+      images: reviewImages.value.join(','),
+    })
     ElMessage.success('评价发表成功')
     reviewScore.value = 0
     reviewContent.value = ''

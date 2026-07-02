@@ -7,10 +7,8 @@ export function getComments(params: CommentQuery) {
 }
 
 // 发表评价
-export function createComment(data: FormData) {
-  return post('/comment/create', data, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  })
+export function createComment(data: { shopId: number; content: string; score: number; images: string }) {
+  return post('/comment/create', data)
 }
 
 // 评价点赞/取消点赞
