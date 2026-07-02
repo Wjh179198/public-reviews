@@ -7,10 +7,8 @@ export function getBlogs(params: BlogQuery) {
 }
 
 // 发表博客
-export function createBlog(data: FormData) {
-  return post('/blog/create', data, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  })
+export function createBlog(data: { shopId: number; title: string; content: string; images: string }) {
+  return post('/blog/create', data)
 }
 
 // 删除博客

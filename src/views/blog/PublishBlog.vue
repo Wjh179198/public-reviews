@@ -107,12 +107,12 @@ async function handlePublish() {
   }
   publishing.value = true
   try {
-    const formData = new FormData()
-    formData.append('shopId', String(selectedShopId.value))
-    formData.append('title', title.value)
-    formData.append('content', content.value)
-    formData.append('images', images.value.join(','))
-    await createBlog(formData)
+    await createBlog({
+      shopId: selectedShopId.value!,
+      title: title.value,
+      content: content.value,
+      images: images.value.join(','),
+    })
     ElMessage.success('发表成功')
     router.push('/blog')
   } catch { /* ignore */ } finally {
