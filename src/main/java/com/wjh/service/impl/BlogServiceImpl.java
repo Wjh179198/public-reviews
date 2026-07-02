@@ -64,7 +64,7 @@ public class BlogServiceImpl implements BlogService {
         if("recommend".equals(type)) {
             blogVOList = blogMapper.getBlogListAll();
         } else if ("following".equals(type)) {
-            String key = RedisConstant.USER_LOGIN_KEY + BaseContext.getThreadLocal().getId().toString();
+            String key = RedisConstant.USER_FOLLOW_KEY + BaseContext.getThreadLocal().getId().toString();
             Set<String> following = stringRedisTemplate.opsForSet().members(key);
             if(following == null || following.isEmpty()) {
                 return Result.success(PageResult.builder().total(0L).records(new ArrayList<>()).pages(0).pageSize(pageSize).build());
@@ -128,5 +128,19 @@ public class BlogServiceImpl implements BlogService {
                 .pages(blogVOPage.getPages())
                 .pageSize(pageSize)
                 .build());
+    }
+
+    @Override
+    public Result deleteBlog(Long blogId) {
+        Blog blog = blogMapper.getById(blogId);
+        if(blog == null) {
+            return Result.error(MessageConstant.BLOG_NOT_EXISTS);
+        }
+        Long userId = blog.getUserId();
+        if(!userId.equals(BaseContext.getThreadLocal().getId())) {
+            return Result.error(MessageConstant.NO_PERMISSION_DELETE_BLOG);
+        }
+        blogMapper.deleteBlog(blogId);
+        return Result.success(MessageConstant.BLOG_DELETE_SUCCESS);
     }
 }

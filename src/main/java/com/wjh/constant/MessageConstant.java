@@ -22,4 +22,7 @@ public class MessageConstant {
     public static final String BLOG_CREATE_SUCCESS = "博客发布成功";
     public static final String INVALID_TYPE = "无效的类型";
     public static final String BLOG_NOT_EXISTS = "该博客不存在";
+    public static final String NO_PERMISSION_DELETE_BLOG = "没有权限删除该博客";
+    public static final Object BLOG_DELETE_SUCCESS = "博客删除成功";
+    public static final String UNKNOWN_ERROR = "未知错误";
 }

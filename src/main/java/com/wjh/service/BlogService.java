@@ -16,4 +16,6 @@ public interface BlogService {
     Result likeBlog(Long blogId);
 
     Result<PageResult> getUserBlogs(Long userId, Integer page, Integer pageSize);
+
+    Result deleteBlog(Long blogId);
 }

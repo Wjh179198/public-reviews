@@ -2,10 +2,7 @@ package com.wjh.mapper;
 
 import com.wjh.entity.Blog;
 import com.wjh.vo.BlogVO;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -25,4 +22,7 @@ public interface BlogMapper {
     void updateLikes(Integer likes, Long blogId);
 
     List<BlogVO> getUserLists(Long userId);
+
+    @Delete("DELETE FROM blog WHERE id = #{blogId}")
+    void deleteBlog(Long blogId);
 }

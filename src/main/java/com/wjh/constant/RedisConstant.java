@@ -12,4 +12,6 @@ public class RedisConstant {
     public static final String SHOP_COMMENT_KEY = "shop:comment";
 
     public static final String BLOG_KEY = "shop:blog";
+    public static final String ADMIN_LOGIN_KEY = "admin:login";
+    public static final Long ADMIN_LOGIN_EXPIRE = 60L * 60L * 2L;
 }

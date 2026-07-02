@@ -5,6 +5,7 @@ import com.wjh.result.PageResult;
 import com.wjh.result.Result;
 import com.wjh.service.BlogService;
 import com.wjh.vo.BlogVO;
+import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,5 +39,10 @@ public class BlogController {
     @GetMapping("/user/{userId}")
     public Result<PageResult> getUserBlogs (@PathVariable Long userId, @RequestParam Integer page, @RequestParam Integer pageSize) {
         return blogService.getUserBlogs(userId, page, pageSize);
+    }
+
+    @Delete("/{blogId}")
+    public Result deleteBlog(@PathVariable Long blogId) {
+        return blogService.deleteBlog(blogId);
     }
 }
