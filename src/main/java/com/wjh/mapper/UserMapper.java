@@ -22,4 +22,6 @@ public interface UserMapper {
     User getById(Long id);
 
     List<User> getList(List<Long> ids);
+
+    List<User> getListByParam(User user);
 }
