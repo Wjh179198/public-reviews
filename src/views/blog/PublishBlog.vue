@@ -7,10 +7,8 @@
         <el-form-item label="关联商家（必选）" required>
           <el-select
             v-model="selectedShopId"
-            placeholder="搜索并选择商家"
+            placeholder="请选择商家"
             filterable
-            remote
-            :remote-method="searchShops"
             :loading="shopLoading"
             clearable
             style="width: 100%"
@@ -65,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { createBlog } from '@/api/blog'
@@ -84,21 +82,15 @@ const content = ref('')
 const images = ref<string[]>([])
 const publishing = ref(false)
 
-async function searchShops(query: string) {
-  if (!query) {
-    shopOptions.value = []
-    return
-  }
+onMounted(async () => {
   shopLoading.value = true
   try {
-    const result = await getShopList({ page: 1, pageSize: 20 })
-    shopOptions.value = result.records.filter((s) =>
-      s.name.toLowerCase().includes(query.toLowerCase())
-    )
+    const result = await getShopList({ page: 1, pageSize: 100 })
+    shopOptions.value = result.records
   } catch { /* ignore */ } finally {
     shopLoading.value = false
   }
-}
+})
 
 async function handlePublish() {
   if (!selectedShopId.value) {
