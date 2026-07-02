@@ -17,4 +17,8 @@ public class MessageConstant {
     public static final String RECHARGE_SUCCESS = "充值成功";
 
     public static final String RECHARGE_FAIL = "充值失败,请稍后重试";
+    public static final String COMMENT_NOT_EXISTS = "评论不存在";
+    public static final String SHOP_NOT_EXISTS = "店铺不存在";
+    public static final String BLOG_CREATE_SUCCESS = "博客发布成功";
+    public static final String INVALID_TYPE = "无效的类型";
 }

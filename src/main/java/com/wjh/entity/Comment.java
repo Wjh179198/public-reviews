@@ -19,6 +19,7 @@ public class Comment implements Serializable {
     private Long userId;
     private String content;
     private Integer score;
+    private Integer likes;
     private String images;
     private LocalDateTime createTime;
 }

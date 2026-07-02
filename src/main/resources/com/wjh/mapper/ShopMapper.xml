@@ -11,11 +11,11 @@
         select s.*, st.name as type_name from shop s
         left join shop_type st on s.type_id = st.id
         <where>
+            and comments = 0
             <if test="typeId != null">
                 and type_id = #{typeId}
             </if>
         </where>
-        and comments = 0
     </select>
     <select id="getListByPageParam" resultType="com.wjh.vo.ShopVO">
         select s.*, st.name as type_name from shop s

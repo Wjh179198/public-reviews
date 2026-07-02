@@ -9,4 +9,8 @@ public interface CommentService {
     Result<CommentVO> createComment(CommentDTO commentDTO);
 
     Result<PageResult> getCommentList(Long shopId, String filter, Integer page, Integer pageSize);
+
+    Result<Boolean> checkIsLike(Long commentId);
+
+    Result likeComment(Long commentId);
 }

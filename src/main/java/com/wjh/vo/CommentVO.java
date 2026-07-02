@@ -21,6 +21,7 @@ public class CommentVO implements Serializable {
     private String userImage;
     private String content;
     private Integer score;
+    private Integer likes;
     private String images;
     private LocalDateTime createTime;
 

@@ -1,6 +1,7 @@
 package com.wjh.service.impl;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.wjh.constant.MessageConstant;
 import com.wjh.constant.RedisConstant;
 import com.wjh.context.BaseContext;
 import com.wjh.dto.CommentDTO;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,7 +44,7 @@ public class CommentServiceImpl implements CommentService {
     public Result<CommentVO> createComment(CommentDTO commentDTO) {
         Shop shop = shopMapper.getById(commentDTO.getShopId());
         if(shop == null) {
-            return Result.error("店铺不存在");
+            return Result.error(MessageConstant.SHOP_NOT_EXISTS);
         }
         BigDecimal score = shop.getScore();
         Integer comments = shop.getComments();
@@ -79,8 +81,9 @@ public class CommentServiceImpl implements CommentService {
         PageHelper.startPage(page, pageSize);
         List<Comment> commentList = commentMapper.getCommentsByPage(shopId, lowScore, highScore);
         if(commentList == null || commentList.isEmpty()) {
-            return Result.success(null);
+            return Result.success(PageResult.builder().total(0L).records(new ArrayList<>()).pages(page).pageSize(pageSize).build());
         }
+        Page<Comment> commentPage = (Page<Comment>) commentList;
         List<CommentVO> commentVOList = commentList.stream().map(comment -> {
             CommentVO commentVO = new CommentVO();
             BeanUtils.copyProperties(comment, commentVO);
@@ -89,12 +92,36 @@ public class CommentServiceImpl implements CommentService {
             commentVO.setUserImage(user.getImage());
             return commentVO;
         }).collect(Collectors.toList());
-        Page<CommentVO> commentVOPage = (Page<CommentVO>) commentVOList;
         return Result.success(PageResult.builder()
-                .total(commentVOPage.getTotal())
-                .records(commentVOPage.getResult())
-                .pages(page)
-                .pageSize(pageSize)
+                .total(commentPage.getTotal())
+                .records(commentVOList)
+                .pages(commentPage.getPages())
+                .pageSize(commentPage.getPageSize())
                 .build());
+    }
+
+    @Override
+    public Result<Boolean> checkIsLike(Long commentId) {
+        String key = RedisConstant.SHOP_COMMENT_KEY + commentId;
+        Boolean member = stringRedisTemplate.opsForSet().isMember(key, BaseContext.getThreadLocal().getId().toString());
+        return Result.success(member);
+    }
+
+    @Override
+    public Result likeComment(Long commentId) {
+        Comment comment = commentMapper.getById(commentId);
+        if(comment == null) {
+            return Result.error(MessageConstant.COMMENT_NOT_EXISTS);
+        }
+        String key = RedisConstant.SHOP_COMMENT_KEY + commentId;
+        Boolean isLike = stringRedisTemplate.opsForSet().isMember(key, BaseContext.getThreadLocal().getId().toString());
+        if(isLike) {
+            stringRedisTemplate.opsForSet().remove(key, BaseContext.getThreadLocal().getId().toString());
+            commentMapper.updateLikes(comment.getLikes() - 1, commentId);
+        } else {
+            stringRedisTemplate.opsForSet().add(key, BaseContext.getThreadLocal().getId().toString());
+            commentMapper.updateLikes(comment.getLikes() + 1, commentId);
+        }
+        return Result.success();
     }
 }
