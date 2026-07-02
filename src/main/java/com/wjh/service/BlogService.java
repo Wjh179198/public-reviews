@@ -10,4 +10,7 @@ public interface BlogService {
     Result<BlogVO> createBlog(BlogDTO blogDTO);
 
     Result<PageResult> getBlogList(String type, Integer page, Integer pageSize);
+
+    Result<Boolean> checkLike(Long blogId);
+
 }

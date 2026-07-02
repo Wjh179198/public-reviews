@@ -25,4 +25,9 @@ public class BlogController {
         return blogService.getBlogList(type, page, pageSize);
     }
 
+    @GetMapping("/like/check/{blogId}")
+    public Result<Boolean> checkLike(@PathVariable Long blogId) {
+        return blogService.checkLike(blogId);
+    }
+
 }

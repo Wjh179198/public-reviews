@@ -21,4 +21,5 @@ public class MessageConstant {
     public static final String SHOP_NOT_EXISTS = "店铺不存在";
     public static final String BLOG_CREATE_SUCCESS = "博客发布成功";
     public static final String INVALID_TYPE = "无效的类型";
+    public static final String BLOG_NOT_EXISTS = "该博客不存在";
 }

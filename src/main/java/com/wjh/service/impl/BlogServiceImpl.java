@@ -83,4 +83,14 @@ public class BlogServiceImpl implements BlogService {
                 .pageSize(pageSize)
                 .build());
     }
+
+    @Override
+    public Result<Boolean> checkLike(Long blogId) {
+        String key = RedisConstant.BLOG_KEY + blogId;
+        Set<String> keys = stringRedisTemplate.keys(key);
+        if (keys == null || keys.isEmpty()) {
+            return Result.error(MessageConstant.BLOG_NOT_EXISTS);
+        }
+        return Result.success(stringRedisTemplate.opsForSet().isMember(key, BaseContext.getThreadLocal().getId().toString()));
+    }
 }
