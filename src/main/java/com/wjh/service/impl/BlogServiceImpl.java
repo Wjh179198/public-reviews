@@ -23,7 +23,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class BlogServiceImpl implements BlogService {
@@ -92,5 +91,42 @@ public class BlogServiceImpl implements BlogService {
             return Result.error(MessageConstant.BLOG_NOT_EXISTS);
         }
         return Result.success(stringRedisTemplate.opsForSet().isMember(key, BaseContext.getThreadLocal().getId().toString()));
+    }
+
+    @Override
+    public Result likeBlog(Long blogId) {
+        Blog blog = blogMapper.getById(blogId);
+        if(blog == null) {
+            return Result.error(MessageConstant.BLOG_NOT_EXISTS);
+        }
+        String key = RedisConstant.BLOG_KEY + blogId;
+        String userId = BaseContext.getThreadLocal().getId().toString();
+        Boolean isLike = stringRedisTemplate.opsForSet().isMember(key, userId);
+        if(isLike) {
+            stringRedisTemplate.opsForSet().remove(key, userId);
+            Integer likes = blog.getLikes();
+            blogMapper.updateLikes(likes - 1, blogId);
+        } else {
+            stringRedisTemplate.opsForSet().add(key, userId);
+            Integer likes = blog.getLikes();
+            blogMapper.updateLikes(likes + 1, blogId);
+        }
+        return Result.success();
+    }
+
+    @Override
+    public Result<PageResult> getUserBlogs(Long userId, Integer page, Integer pageSize) {
+        PageHelper.startPage(page, pageSize);
+        List<BlogVO> blogVOList = blogMapper.getUserLists(userId);
+        if(blogVOList == null || blogVOList.isEmpty()) {
+            return Result.success(PageResult.builder().total(0L).records(new ArrayList<>()).pages(0).pageSize(pageSize).build());
+        }
+        Page<BlogVO> blogVOPage = (Page<BlogVO>) blogVOList;
+        return Result.success(PageResult.builder()
+                .total(blogVOPage.getTotal())
+                .records(blogVOPage.getResult())
+                .pages(blogVOPage.getPages())
+                .pageSize(pageSize)
+                .build());
     }
 }

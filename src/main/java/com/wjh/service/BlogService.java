@@ -13,4 +13,7 @@ public interface BlogService {
 
     Result<Boolean> checkLike(Long blogId);
 
+    Result likeBlog(Long blogId);
+
+    Result<PageResult> getUserBlogs(Long userId, Integer page, Integer pageSize);
 }

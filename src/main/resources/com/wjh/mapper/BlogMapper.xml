@@ -23,4 +23,10 @@
         where b.user_id = u.id and b.shop_id = s.id
         order by b.create_time desc
     </select>
+    <select id="getUserLists" resultType="com.wjh.vo.BlogVO">
+        select b.*, u.name as userName, u.image as userImage, s.name as shopName
+        from blog b, user u, shop s
+        where b.user_id = u.id and b.shop_id = s.id and b.user_id = #{userId}
+        order by b.create_time desc
+    </select>
 </mapper>

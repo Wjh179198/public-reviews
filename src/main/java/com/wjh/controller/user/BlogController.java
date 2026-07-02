@@ -30,4 +30,13 @@ public class BlogController {
         return blogService.checkLike(blogId);
     }
 
+    @PostMapping("/{blogId}/like")
+    public Result likeBlog(@PathVariable Long blogId) {
+        return blogService.likeBlog(blogId);
+    }
+
+    @GetMapping("/user/{userId}")
+    public Result<PageResult> getUserBlogs (@PathVariable Long userId, @RequestParam Integer page, @RequestParam Integer pageSize) {
+        return blogService.getUserBlogs(userId, page, pageSize);
+    }
 }
