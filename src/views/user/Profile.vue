@@ -48,7 +48,7 @@
       <div v-if="myBlogs.length" class="blog-mini-list">
         <div v-for="blog in myBlogs" :key="blog.id" class="blog-mini-item">
           <div class="blog-mini-info">
-            <h4>{{ blog.title }}</h4>
+            <h4 class="blog-mini-title" @click="$router.push(`/shops/${blog.shopId}`)">{{ blog.title }}</h4>
             <span class="blog-mini-time">{{ formatTime(blog.createTime) }}</span>
             <span class="blog-mini-likes">👍 {{ blog.likes }}</span>
           </div>
@@ -288,6 +288,14 @@ watch(showFollows, (val) => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.blog-mini-title {
+  cursor: pointer;
+}
+
+.blog-mini-title:hover {
+  color: #409eff;
 }
 
 .blog-mini-time {
