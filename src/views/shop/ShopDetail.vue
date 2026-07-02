@@ -303,8 +303,9 @@ async function fetchComments() {
       page: commentPage.value,
       pageSize: 10,
     })
-    comments.value = result.records
-    commentTotal.value = result.total
+    // 防御：后端无数据时可能返回 null
+    comments.value = result?.records || []
+    commentTotal.value = result?.total || 0
     // 批量检查点赞状态
     const ids = comments.value.map(c => c.id)
     if (ids.length > 0) {
@@ -316,6 +317,8 @@ async function fetchComments() {
         if (r.status === 'fulfilled' && r.value) set.add(ids[i])
       })
       likedCommentIds.value = set
+    } else {
+      likedCommentIds.value = new Set()
     }
   } catch { /* ignore */ } finally {
     commentLoading.value = false
