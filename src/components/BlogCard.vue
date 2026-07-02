@@ -12,7 +12,7 @@
       </div>
     </div>
 
-    <h3 class="blog-title">{{ blog.title }}</h3>
+    <h3 class="blog-title" @click="router.push(`/shops/${blog.shopId}`)">{{ blog.title }}</h3>
     <p class="blog-content">{{ blog.content }}</p>
 
     <div v-if="images.length" class="blog-images">
@@ -49,10 +49,13 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import type { Blog } from '@/types'
 import { formatTime, parseImages } from '@/utils'
 import { CaretTop } from '@element-plus/icons-vue'
 import UserAvatar from './UserAvatar.vue'
+
+const router = useRouter()
 
 const props = defineProps<{
   blog: Blog
@@ -103,6 +106,11 @@ const images = computed(() => parseImages(props.blog.images))
   font-size: 18px;
   color: #303133;
   margin-bottom: 8px;
+  cursor: pointer;
+}
+
+.blog-title:hover {
+  color: #409eff;
 }
 
 .blog-content {
