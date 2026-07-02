@@ -143,18 +143,22 @@ const images = computed(() => parseImages(props.blog.images))
   align-items: center;
   gap: 4px;
   font-size: 14px;
-  color: #909399;
+  color: #606266;
   cursor: pointer;
-  padding: 4px 10px;
-  border-radius: 4px;
+  padding: 4px 12px;
+  border-radius: 16px;
+  background: #f5f7fa;
   transition: all 0.2s;
+  user-select: none;
 }
 
 .like-btn:hover {
-  background: #f0f2f5;
+  color: #409eff;
+  background: #ecf5ff;
 }
 
 .like-btn.liked {
-  color: #409eff;
+  color: #fff;
+  background: #409eff;
 }
 </style>
