@@ -8,10 +8,13 @@ const instance: AxiosInstance = axios.create({
   timeout: 15000,
 })
 
-// 请求拦截器 - 注入 token
+// 请求拦截器 - 注入 token（管理端和用户端分别取不同的 key）
 instance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token')
+    const isAdminPath = config.url?.startsWith('/admin/')
+    const token = isAdminPath
+      ? localStorage.getItem('adminToken')
+      : localStorage.getItem('token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
