@@ -263,6 +263,7 @@ onMounted(async () => {
   await fetchShopDetail()
   await fetchVouchers()
   await fetchMyVouchers()
+  await fetchComments()
 })
 
 async function fetchShopDetail() {
