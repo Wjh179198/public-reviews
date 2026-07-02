@@ -139,26 +139,20 @@ const images = computed(() => parseImages(props.blog.images))
 }
 
 .like-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 4px;
   font-size: 14px;
-  color: #606266;
+  color: #909399;
   cursor: pointer;
-  padding: 4px 12px;
-  border-radius: 16px;
-  background: #f5f7fa;
-  transition: all 0.2s;
   user-select: none;
 }
 
 .like-btn:hover {
   color: #409eff;
-  background: #ecf5ff;
 }
 
 .like-btn.liked {
-  color: #fff;
-  background: #409eff;
+  color: #409eff;
 }
 </style>
