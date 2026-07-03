@@ -9,4 +9,6 @@ public interface AdminMapper {
 
     @Select("select * from admin where name = #{name}")
     Admin getByName(String name);
+
+    void update(Admin admin);
 }

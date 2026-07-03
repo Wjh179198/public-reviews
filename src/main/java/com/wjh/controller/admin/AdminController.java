@@ -6,6 +6,7 @@ import com.wjh.entity.User;
 import com.wjh.result.PageResult;
 import com.wjh.result.Result;
 import com.wjh.service.AdminService;
+import com.wjh.vo.AdminVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,4 +41,15 @@ public class AdminController {
     public Result unbanUser (@PathVariable Long userId) {
         return adminService.unbanUser(userId);
     }
+
+    @GetMapping("/info")
+    public Result<AdminVO> getInfo () {
+        return adminService.getInfo();
+    }
+
+    @PutMapping("/update")
+    public Result updateAdmin (@RequestBody AdminLoginDTO adminLoginDTO) {
+        return adminService.updateAdmin(adminLoginDTO);
+    }
+
 }

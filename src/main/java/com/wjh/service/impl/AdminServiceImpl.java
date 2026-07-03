@@ -7,6 +7,7 @@ import com.github.pagehelper.PageHelper;
 import com.wjh.constant.MessageConstant;
 import com.wjh.constant.RedisConstant;
 import com.wjh.constant.UserStatusConstant;
+import com.wjh.context.AdminBaseContext;
 import com.wjh.dto.AdminDTO;
 import com.wjh.dto.AdminLoginDTO;
 import com.wjh.entity.Admin;
@@ -17,6 +18,8 @@ import com.wjh.result.PageResult;
 import com.wjh.result.Result;
 import com.wjh.service.AdminService;
 import com.wjh.vo.AdminLoginVO;
+import com.wjh.vo.AdminVO;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -114,8 +117,29 @@ public class AdminServiceImpl implements AdminService {
         } else {
             user.setStatus(UserStatusConstant.COMMON_USER);
         }
+        userMapper.update(user);
         String banKey = RedisConstant.BAN_USER_KEY;
         stringRedisTemplate.opsForSet().remove(banKey, userId.toString());
         return Result.success("用户解封成功");
+    }
+
+    @Override
+    public Result<AdminVO> getInfo() {
+        AdminDTO adminDTO = AdminBaseContext.get();
+        Admin admin = adminMapper.getByName(adminDTO.getName());
+        AdminVO adminVO = new AdminVO();
+        BeanUtils.copyProperties(admin, adminVO);
+        return Result.success(adminVO);
+    }
+
+    @Override
+    public Result updateAdmin(AdminLoginDTO adminLoginDTO) {
+        Admin admin = new Admin();
+        admin.setName(adminLoginDTO.getName());
+        if (adminLoginDTO.getPassword() != null || !adminLoginDTO.getPassword().isEmpty()) {
+            admin.setPassword(DigestUtils.md5DigestAsHex(adminLoginDTO.getPassword().getBytes()));
+        }
+        adminMapper.update(admin);
+        return Result.success("更新成功");
     }
 }

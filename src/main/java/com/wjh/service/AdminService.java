@@ -4,6 +4,7 @@ import com.wjh.dto.AdminLoginDTO;
 import com.wjh.entity.User;
 import com.wjh.result.PageResult;
 import com.wjh.result.Result;
+import com.wjh.vo.AdminVO;
 
 public interface AdminService {
 
@@ -16,4 +17,9 @@ public interface AdminService {
     Result banUser(Long userId);
 
     Result unbanUser(Long userId);
+
+    Result<AdminVO> getInfo();
+
+    Result updateAdmin(AdminLoginDTO adminLoginDTO);
+
 }
