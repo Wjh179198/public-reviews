@@ -22,5 +22,5 @@ public class RedisConstant {
     public static final String VOUCHER_BEGIN_KEY = "voucher:begin";
     public static final String VOUCHER_END_KEY = "voucher:end";
     public static final String VOUCHER_ORDER_KEY = "voucher:order";
-    public static final String VOUCHER_KEY = "voucher";
+    public static final String VOUCHER_KEY = "voucher:";
 }

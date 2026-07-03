@@ -154,9 +154,22 @@ public class VoucherServiceImpl implements VoucherService {
         voucherOrder.setShopId(shopId);
         voucherOrder.setStatus(VoucherStatusConstant.AVAILABLE);
         voucherOrder.setOrderTime(LocalDateTime.now());
-        voucherOrderMapper.insert(voucherOrder);
+        int inserted = voucherOrderMapper.insert(voucherOrder);
+        if (inserted == 0) {
+            stringRedisTemplate.opsForStream().acknowledge("stream.voucher", "voucher_consumer", msgId);
+            return;
+        }
         BigDecimal money = getMoneyFromRedis(userId);
         setMoneyToRedis(userId, money.subtract(voucherPrice));
+        try {
+            voucherMapper.decrementStock(voucherId);
+            User user = userMapper.getById(userId);
+            user.setMoney(money.subtract(voucherPrice));
+            userMapper.update(user);
+        } catch (Exception e) {
+            setMoneyToRedis(userId, money);
+            throw e;
+        }
         stringRedisTemplate.opsForStream().acknowledge("stream.voucher", "voucher_consumer", msgId);
     }
 
