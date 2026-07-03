@@ -11,4 +11,6 @@ public interface VoucherMapper {
 
     @Select("select * from voucher where shop_id = #{shopId}")
     List<Voucher> getByShopId(Long shopId);
+
+    void insert(Voucher voucher);
 }

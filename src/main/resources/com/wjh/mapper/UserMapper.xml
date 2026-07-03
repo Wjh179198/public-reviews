@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wjh.mapper.UserMapper">
+    <select id="selectByParams" resultType="com.wjh.entity.User">
+        select id, name, phone, image, password, fans_counts, follower_counts, money, address, status, shop_id, create_time, update_time from user
+        <where>
+            <if test="id != null">
+                and id = #{id}
+            </if>
+            <if test="name != null and name != ''">
+                and name like concat('%', #{name}, '%')
+            </if>
+            <if test="phone != null and phone != ''">
+                and phone = #{phone}
+            </if>
+            <if test="password != null and password != ''">
+                and password = #{password}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+            <if test="shopId != null">
+                and shop_id = #{shopId}
+            </if>
+            <if test="createTime != null">
+                and create_time = #{createTime}
+            </if>
+            <if test="updateTime != null">
+                and update_time = #{updateTime}
+            </if>
+        </where>
+    </select>
+    <update id="update">
+        update user
+        <set>
+            <if test="name != null and name != ''">
+                name = #{name},
+            </if>
+            <if test="address != null and address != ''">
+                address = #{address},
+            </if>
+            <if test="image != null and image != ''">
+                image = #{image},
+            </if>
+            <if test="fansCounts != null">
+                fans_counts = #{fansCounts},
+            </if>
+            <if test="followerCounts != null">
+                follower_counts = #{followerCounts},
+            </if>
+            <if test="money != null">
+                money = #{money},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="shopId != null">
+                shop_id = #{shopId},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+    <select id="getListByName" resultType="com.wjh.entity.User">
+        select id, name, phone, image, password, fans_counts, follower_counts, money, address, status, shop_id, create_time, update_time
+        from user
+        where name like concat('%', #{name}, '%')
+    </select>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into user (phone, name, password, create_time, update_time)
+        values (#{phone}, #{name}, #{password}, #{createTime}, #{updateTime})
+    </insert>
+    <select id="getList" resultType="com.wjh.entity.User">
+        select id, name, phone, image, password, fans_counts, follower_counts, money, address, status, shop_id, create_time, update_time
+        from user where id in
+        <foreach collection="ids" separator="," open="(" close=")" item="id">
+            #{id}
+        </foreach>
+    </select>
+    <select id="getListByParam" resultType="com.wjh.entity.User">
+        select id, name, phone, image, password, fans_counts, follower_counts, money, address, status, shop_id, create_time, update_time from user
+        <where>
+            <if test="id != null">
+                and id = #{id}
+            </if>
+            <if test="name != null and name != ''">
+                and name like concat('%', #{name}, '%')
+            </if>
+            <if test="phone != null and phone != ''">
+                and phone = #{phone}
+            </if>
+            <if test="password != null and password != ''">
+                and password = #{password}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+            <if test="shopId != null">
+                and shop_id = #{shopId}
+            </if>
+            <if test="createTime != null">
+                and create_time = #{createTime}
+            </if>
+            <if test="updateTime != null">
+                and update_time = #{updateTime}
+            </if>
+        </where>
+    </select>
+</mapper>
