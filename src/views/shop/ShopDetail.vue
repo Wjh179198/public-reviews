@@ -337,6 +337,7 @@ async function handleGrabVoucher(voucher: Voucher) {
     await grabVoucher(voucher.id)
     ElMessage.success('抢购成功！')
     purchasedVoucherIds.value.push(voucher.id)
+    await userStore.fetchUser()
     await fetchMyVouchers()
     await fetchVouchers()
   } catch {
