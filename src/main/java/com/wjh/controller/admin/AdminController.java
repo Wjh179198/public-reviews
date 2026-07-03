@@ -31,8 +31,13 @@ public class AdminController {
         return adminService.getUserById(userId);
     }
 
-    @GetMapping("/user/ban/{userId}")
+    @PostMapping("/user/ban/{userId}")
     public Result banUser (@PathVariable Long userId) {
         return adminService.banUser(userId);
+    }
+
+    @PostMapping("/user/unban/{userId}")
+    public Result unbanUser (@PathVariable Long userId) {
+        return adminService.unbanUser(userId);
     }
 }

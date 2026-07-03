@@ -14,4 +14,6 @@ public interface AdminService {
     Result<User> getUserById(Long userId);
 
     Result banUser(Long userId);
+
+    Result unbanUser(Long userId);
 }

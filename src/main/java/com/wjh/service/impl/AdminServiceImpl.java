@@ -102,4 +102,20 @@ public class AdminServiceImpl implements AdminService {
         stringRedisTemplate.opsForSet().add(banKey, userId.toString());
         return Result.success("用户封禁成功");
     }
+
+    @Override
+    public Result unbanUser(Long userId) {
+        User user = userMapper.getById(userId);
+        if (user == null) {
+            return Result.error(MessageConstant.USER_NOT_EXISTS);
+        }
+        if(user.getShopId() != null) {
+            user.setStatus(UserStatusConstant.SHOP_USER);
+        } else {
+            user.setStatus(UserStatusConstant.COMMON_USER);
+        }
+        String banKey = RedisConstant.BAN_USER_KEY;
+        stringRedisTemplate.opsForSet().remove(banKey, userId.toString());
+        return Result.success("用户解封成功");
+    }
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wjh.constant.MessageConstant;
 import com.wjh.constant.RedisConstant;
+import com.wjh.constant.UserStatusConstant;
 import com.wjh.context.BaseContext;
 import com.wjh.dto.*;
 import com.wjh.entity.User;
@@ -102,6 +103,9 @@ public class UserServiceImpl implements UserService {
         if(!user1.getPassword().equals(DigestUtils.md5DigestAsHex(userLoginDTO.getPassword().getBytes()))) {
             return Result.error(MessageConstant.PASSWORD_ERROR);
         }
+        if(user1.getStatus().equals(UserStatusConstant.BAN_USER)) {
+            return Result.error(MessageConstant.USER_BAN_ERROR);
+        }
         String token = UUID.randomUUID().toString() + user1.getId();
         String key = RedisConstant.USER_LOGIN_KEY + token;
         UserDTO userDTO = new UserDTO();
@@ -120,16 +124,19 @@ public class UserServiceImpl implements UserService {
         if(!phone.matches(PHONE_REGEX)) {
             return Result.error(MessageConstant.PHONE_REGEX_ERROR);
         }
+        String key = RedisConstant.SMS_CODE_KEY + phone;
+        String code = stringRedisTemplate.opsForValue().get(key);
+        if(code == null || !code.equals(userLoginDTO.getCode())) {
+            return Result.error(MessageConstant.CODE_ERROR);
+        }
         User user = new User();
         user.setPhone(phone);
         User user1 = userMapper.selectByParams(user);
         if(user1 == null) {
             return Result.error(MessageConstant.PHONE_NOT_EXIST);
         }
-        String key = RedisConstant.SMS_CODE_KEY + phone;
-        String code = stringRedisTemplate.opsForValue().get(key);
-        if(code == null || !code.equals(userLoginDTO.getCode())) {
-            return Result.error(MessageConstant.CODE_ERROR);
+        if(user1.getStatus().equals(UserStatusConstant.BAN_USER)) {
+            return Result.error(MessageConstant.USER_BAN_ERROR);
         }
         UserDTO userDTO = new UserDTO();
         BeanUtils.copyProperties(user1, userDTO);
@@ -181,7 +188,9 @@ public class UserServiceImpl implements UserService {
             return new ArrayList<>();
         }
         List<User> userList = userMapper.getListByName(keyword);
-        List<UserVO> userVOList = userList.stream().map(user -> UserVO.builder()
+        List<UserVO> userVOList = userList.stream()
+                .filter(user -> user.getStatus().equals(UserStatusConstant.BAN_USER))
+                .map(user -> UserVO.builder()
                 .id(user.getId())
                 .name(user.getName())
                 .image(user.getImage())
@@ -198,6 +207,9 @@ public class UserServiceImpl implements UserService {
         User user1 = userMapper.getById(userId);
         if(user1 == null) {
             throw new RuntimeException(MessageConstant.USER_NOT_EXISTS);
+        }
+        if(user1.getStatus().equals(UserStatusConstant.BAN_USER)) {
+            throw new RuntimeException(MessageConstant.USER_BAN_ERROR);
         }
         UserVO userVO = new UserVO();
         BeanUtils.copyProperties(user1, userVO);

@@ -25,4 +25,5 @@ public class MessageConstant {
     public static final String NO_PERMISSION_DELETE_BLOG = "没有权限删除该博客";
     public static final Object BLOG_DELETE_SUCCESS = "博客删除成功";
     public static final String UNKNOWN_ERROR = "未知错误";
+    public static final String USER_BAN_ERROR = "用户被封禁";
 }

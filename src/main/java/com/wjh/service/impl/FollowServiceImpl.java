@@ -1,7 +1,9 @@
 package com.wjh.service.impl;
 
 import com.wjh.constant.FollowConstant;
+import com.wjh.constant.MessageConstant;
 import com.wjh.constant.RedisConstant;
+import com.wjh.constant.UserStatusConstant;
 import com.wjh.context.BaseContext;
 import com.wjh.entity.Follow;
 import com.wjh.entity.User;
@@ -163,6 +165,10 @@ public class FollowServiceImpl implements FollowService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result follow(Long userId) {
+        User user = userMapper.getById(userId);
+        if(user.getStatus().equals(UserStatusConstant.BAN_USER)) {
+            return Result.error(MessageConstant.USER_BAN_ERROR + "无法操作");
+        }
         String key = RedisConstant.USER_FAN_KEY + userId;
         Boolean isMember = stringRedisTemplate.opsForSet().isMember(key, BaseContext.getThreadLocal().getId().toString());
         if(isMember) {
