@@ -24,4 +24,7 @@ public interface UserMapper {
     List<User> getList(List<Long> ids);
 
     List<User> getListByParam(User user);
+
+    @Select("select * from user where shop_id = #{shopId}")
+    User getByShopId(Long shopId);
 }

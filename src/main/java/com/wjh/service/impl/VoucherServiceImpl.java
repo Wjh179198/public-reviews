@@ -63,6 +63,7 @@ public class VoucherServiceImpl implements VoucherService {
     private VoucherOrderMapper voucherOrderMapper;
     @Autowired
     private ShopMapper shopMapper;
+    @Autowired
     @Lazy
     private VoucherServiceImpl self;
 
@@ -166,6 +167,9 @@ public class VoucherServiceImpl implements VoucherService {
             User user = userMapper.getById(userId);
             user.setMoney(money.subtract(voucherPrice));
             userMapper.update(user);
+            User user1 = userMapper.getByShopId(shopId);
+            user1.setMoney(user1.getMoney().add(voucherPrice));
+            userMapper.update(user1);
         } catch (Exception e) {
             setMoneyToRedis(userId, money);
             throw e;
@@ -225,22 +229,11 @@ public class VoucherServiceImpl implements VoucherService {
 
     @Override
     public List<Voucher> getShopVouchers(Long shopId) {
-        String key = RedisConstant.SHOP_VOUCHER_KEY + shopId.toString();
-        String json = stringRedisTemplate.opsForValue().get(key);
-        if (json == null || json.isEmpty()) {
-            List<Voucher> voucherList = voucherMapper.getByShopId(shopId);
-            try {
-                stringRedisTemplate.opsForValue().set(key, objectMapper.writeValueAsString(voucherList));
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
-            return voucherList;
+        List<Voucher> voucherList = voucherMapper.getByShopId(shopId);
+        if (voucherList == null || voucherList.isEmpty()) {
+            return Collections.emptyList();
         }
-        try {
-            return objectMapper.readValue(json, new com.fasterxml.jackson.core.type.TypeReference<List<Voucher>>() {});
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return voucherList;
     }
 
     @Override
@@ -268,11 +261,13 @@ public class VoucherServiceImpl implements VoucherService {
 
     @Override
     public Result<Boolean> getVoucherStock(Long voucherId) {
-        Voucher voucher = voucherMapper.getById(voucherId);
-        if(voucher == null) {
-            return Result.error(MessageConstant.VOUCHER_NOT_EXISTS);
+        String key = RedisConstant.VOUCHER_STOCK_KEY + voucherId;
+        String json = stringRedisTemplate.opsForValue().get(key);
+        if (json != null) {
+            int stock = Integer.parseInt(json);
+            return Result.success(stock > 0);
         }
-        return Result.success(voucher.getStock() > 0);
+        return Result.error(MessageConstant.VOUCHER_NOT_EXISTS);
     }
 
     @Override
