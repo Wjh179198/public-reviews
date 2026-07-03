@@ -32,7 +32,7 @@
         </el-menu-item>
         <el-menu-item index="/shop-manage">
           <el-icon><Setting /></el-icon>
-          <span>店铺管理</span>
+          <span>我的店铺</span>
         </el-menu-item>
         <el-menu-item index="/profile">
           <el-icon><User /></el-icon>

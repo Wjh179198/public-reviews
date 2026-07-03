@@ -1,6 +1,6 @@
 <template>
   <div class="page-container">
-    <h2 class="page-title">店铺管理</h2>
+    <h2 class="page-title">我的店铺</h2>
 
     <!-- 未注册商家 -->
     <div v-if="!userStore.isMerchant" class="card-wrapper no-shop">
@@ -16,63 +16,6 @@
     <!-- 已注册商家 -->
     <template v-else>
       <el-tabs v-model="activeTab" @tab-change="handleTabChange">
-        <!-- ===== 营业额统计 ===== -->
-        <el-tab-pane label="营业额统计" name="revenue">
-          <div class="card-wrapper">
-            <h3 class="section-title">近7天营业额</h3>
-            <div ref="chartRef" class="chart-container" />
-          </div>
-        </el-tab-pane>
-
-        <!-- ===== 优惠卷 ===== -->
-        <el-tab-pane label="优惠卷" name="vouchers">
-          <!-- 发布优惠卷 -->
-          <div class="card-wrapper">
-            <h3 class="section-title">发布优惠卷</h3>
-            <el-form label-position="top" size="default" style="max-width: 600px">
-              <el-row :gutter="20">
-                <el-col :span="12">
-                  <el-form-item label="价格 (元)">
-                    <el-input-number v-model="voucherForm.price" :min="0" :precision="2" style="width: 100%" />
-                  </el-form-item>
-                </el-col>
-                <el-col :span="12">
-                  <el-form-item label="优惠金额 (元)">
-                    <el-input-number v-model="voucherForm.value" :min="1" :precision="2" style="width: 100%" />
-                  </el-form-item>
-                </el-col>
-              </el-row>
-              <el-row :gutter="20">
-                <el-col :span="12">
-                  <el-form-item label="开始时间">
-                    <el-date-picker v-model="voucherForm.beginTime" type="datetime" placeholder="选择开始时间" style="width: 100%" />
-                  </el-form-item>
-                </el-col>
-                <el-col :span="12">
-                  <el-form-item label="结束时间">
-                    <el-date-picker v-model="voucherForm.endTime" type="datetime" placeholder="选择结束时间" style="width: 100%" />
-                  </el-form-item>
-                </el-col>
-              </el-row>
-              <el-form-item label="库存">
-                <el-input-number v-model="voucherForm.stock" :min="1" :max="99999" style="width: 200px" />
-              </el-form-item>
-              <el-form-item>
-                <el-button type="primary" :loading="pubLoading" @click="handlePublishVoucher">发布优惠卷</el-button>
-              </el-form-item>
-            </el-form>
-          </div>
-
-          <!-- 已有优惠卷 -->
-          <div class="card-wrapper">
-            <h3 class="section-title">我的优惠卷</h3>
-            <div v-if="manageVouchers.length" class="voucher-list">
-              <VoucherCard v-for="v in manageVouchers" :key="v.id" :voucher="v" />
-            </div>
-            <el-empty v-else description="暂无优惠卷" :image-size="60" />
-          </div>
-        </el-tab-pane>
-
         <!-- ===== 店铺信息 ===== -->
         <el-tab-pane label="店铺信息" name="info">
           <!-- 店铺基本信息 -->
@@ -162,6 +105,60 @@
             </div>
           </div>
         </el-tab-pane>
+
+        <!-- ===== 营业额统计 ===== -->
+        <el-tab-pane label="营业额统计" name="revenue">
+          <div class="card-wrapper">
+            <h3 class="section-title">近7天营业额</h3>
+            <div ref="chartRef" class="chart-container" />
+          </div>
+        </el-tab-pane>
+
+        <!-- ===== 优惠卷 ===== -->
+        <el-tab-pane label="优惠卷" name="vouchers">
+          <div class="card-wrapper">
+            <h3 class="section-title">发布优惠卷</h3>
+            <el-form label-position="top" size="default" style="max-width: 600px">
+              <el-row :gutter="20">
+                <el-col :span="12">
+                  <el-form-item label="价格 (元)">
+                    <el-input-number v-model="voucherForm.price" :min="0" :precision="2" style="width: 100%" />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item label="优惠金额 (元)">
+                    <el-input-number v-model="voucherForm.value" :min="1" :precision="2" style="width: 100%" />
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row :gutter="20">
+                <el-col :span="12">
+                  <el-form-item label="开始时间">
+                    <el-date-picker v-model="voucherForm.beginTime" type="datetime" placeholder="选择开始时间" style="width: 100%" />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item label="结束时间">
+                    <el-date-picker v-model="voucherForm.endTime" type="datetime" placeholder="选择结束时间" style="width: 100%" />
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-form-item label="库存">
+                <el-input-number v-model="voucherForm.stock" :min="1" :max="99999" style="width: 200px" />
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" :loading="pubLoading" @click="handlePublishVoucher">发布优惠卷</el-button>
+              </el-form-item>
+            </el-form>
+          </div>
+          <div class="card-wrapper">
+            <h3 class="section-title">我的优惠卷</h3>
+            <div v-if="manageVouchers.length" class="voucher-list">
+              <VoucherCard v-for="v in manageVouchers" :key="v.id" :voucher="v" />
+            </div>
+            <el-empty v-else description="暂无优惠卷" :image-size="60" />
+          </div>
+        </el-tab-pane>
       </el-tabs>
     </template>
   </div>
@@ -184,7 +181,7 @@ import UserAvatar from '@/components/UserAvatar.vue'
 
 const userStore = useUserStore()
 
-const activeTab = ref('revenue')
+const activeTab = ref('info')
 
 // 店铺信息
 const shop = ref<Shop | null>(null)
@@ -319,7 +316,8 @@ function handleTabChange(tab: string) {
 
 onMounted(() => {
   if (userStore.isMerchant) {
-    fetchRevenue()
+    fetchShopInfo()
+    fetchComments()
   }
 })
 </script>
