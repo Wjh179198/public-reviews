@@ -27,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, watch } from 'vue'
 import type { Voucher } from '@/types'
 import { formatDate } from '@/utils'
 import { useUserStore } from '@/stores/user'
@@ -48,11 +48,16 @@ const userStore = useUserStore()
 const now = new Date()
 const hasStock = ref(true)
 
-onMounted(async () => {
+async function refreshStock() {
   try {
     hasStock.value = await checkVoucherStock(props.voucher.id)
   } catch { /* ignore */ }
-})
+}
+
+// voucher 变化时（父组件重新拉取列表）重新检查库存
+watch(() => props.voucher, () => { refreshStock() })
+
+refreshStock()
 
 const isExpired = computed(() => new Date(props.voucher.endTime) < now)
 const notStarted = computed(() => new Date(props.voucher.beginTime) > now)
