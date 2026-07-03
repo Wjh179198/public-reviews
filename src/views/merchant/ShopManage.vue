@@ -15,10 +15,106 @@
 
     <!-- 已注册商家 -->
     <template v-else>
+      <!-- 店铺详情 -->
+      <div v-if="shop" class="card-wrapper">
+        <h3 class="section-title">店铺信息</h3>
+        <div class="shop-info-grid">
+          <div class="shop-info-item">
+            <span class="shop-info-label">店铺名称</span>
+            <span class="shop-info-value">{{ shop.name }}</span>
+          </div>
+          <div class="shop-info-item">
+            <span class="shop-info-label">类型</span>
+            <span class="shop-info-value">{{ shop.typeName }}</span>
+          </div>
+          <div class="shop-info-item">
+            <span class="shop-info-label">地址</span>
+            <span class="shop-info-value">{{ shop.address }}</span>
+          </div>
+          <div class="shop-info-item">
+            <span class="shop-info-label">人均价格</span>
+            <span class="shop-info-value">¥{{ shop.price?.toFixed(2) }}</span>
+          </div>
+          <div class="shop-info-item">
+            <span class="shop-info-label">评分</span>
+            <span class="shop-info-value">
+              <StarRating :score="shop.score" :size="14" />
+              {{ shop.score?.toFixed(1) }}
+            </span>
+          </div>
+          <div class="shop-info-item">
+            <span class="shop-info-label">评论数</span>
+            <span class="shop-info-value">{{ shop.comments }}</span>
+          </div>
+          <div class="shop-info-item">
+            <span class="shop-info-label">销量</span>
+            <span class="shop-info-value">{{ shop.sold }}</span>
+          </div>
+        </div>
+      </div>
+
       <!-- 营业额图表 -->
       <div class="card-wrapper">
         <h3 class="section-title">近7天营业额</h3>
         <div ref="chartRef" class="chart-container" />
+      </div>
+
+      <!-- 用户评价 -->
+      <div class="card-wrapper">
+        <h3 class="section-title">用户评价 ({{ commentTotal }})</h3>
+        <div class="review-filters">
+          <el-radio-group v-model="commentFilter" @change="fetchComments">
+            <el-radio-button label="all">全部</el-radio-button>
+            <el-radio-button label="good">好评</el-radio-button>
+            <el-radio-button label="mid">中评</el-radio-button>
+            <el-radio-button label="bad">差评</el-radio-button>
+          </el-radio-group>
+        </div>
+        <div v-loading="commentLoading" class="review-list">
+          <div v-for="c in comments" :key="c.id" class="review-item">
+            <div class="review-header">
+              <UserAvatar :user-id="c.userId" :image="c.userImage || ''" :size="36" />
+              <div class="review-user-info">
+                <span class="review-username">{{ c.userName }}</span>
+                <StarRating :score="c.score" :size="12" />
+              </div>
+              <span class="review-time">{{ formatTime(c.createTime) }}</span>
+            </div>
+            <div class="review-body">{{ c.content }}</div>
+            <div v-if="c.images" class="review-images">
+              <el-image
+                v-for="(img, idx) in parseImages(c.images)"
+                :key="idx"
+                :src="img"
+                :preview-src-list="parseImages(c.images)"
+                :initial-index="idx"
+                fit="cover"
+                class="review-thumb"
+              />
+            </div>
+            <div class="review-footer">
+              <span
+                class="like-btn"
+                :class="{ 'liked': likedCommentIds.has(c.id) }"
+                @click="handleLikeComment(c)"
+              >
+                <el-icon><CaretTop /></el-icon>
+                {{ c.likes }}
+              </span>
+            </div>
+          </div>
+          <el-empty v-if="!commentLoading && !comments.length" description="暂无评价" />
+        </div>
+        <div v-if="commentTotal > 10" class="pagination-area">
+          <el-pagination
+            v-model:current-page="commentPage"
+            :page-size="10"
+            :total="commentTotal"
+            background
+            layout="prev, pager, next"
+            @change="fetchComments"
+          />
+        </div>
       </div>
 
       <!-- 发布优惠卷 -->
@@ -108,17 +204,33 @@
 import { ref, reactive, onMounted, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import * as echarts from 'echarts'
+import { CaretTop } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
-import { getShopRevenue } from '@/api/shop'
+import { getShopDetail, getShopRevenue } from '@/api/shop'
 import { createVoucher, getManageVouchers } from '@/api/voucher'
-import type { DailyRevenue, Voucher } from '@/types'
+import { getComments, likeComment, checkCommentLikeStatus } from '@/api/comment'
+import { formatTime, parseImages } from '@/utils'
+import type { DailyRevenue, Voucher, Shop, Comment } from '@/types'
 import VoucherCard from '@/components/VoucherCard.vue'
+import StarRating from '@/components/StarRating.vue'
+import UserAvatar from '@/components/UserAvatar.vue'
 
 const userStore = useUserStore()
+
+// 店铺信息
+const shop = ref<Shop | null>(null)
 
 // 图表
 const chartRef = ref<HTMLDivElement>()
 let chartInstance: echarts.ECharts | null = null
+
+// 评论
+const comments = ref<Comment[]>([])
+const likedCommentIds = ref<Set<number>>(new Set())
+const commentFilter = ref('all')
+const commentPage = ref(1)
+const commentTotal = ref(0)
+const commentLoading = ref(false)
 
 // 优惠卷
 const manageVouchers = ref<Voucher[]>([])
@@ -131,6 +243,13 @@ const voucherForm = reactive({
   endTime: '',
   stock: 100,
 })
+
+async function fetchShopInfo() {
+  if (!userStore.userInfo?.shopId) return
+  try {
+    shop.value = await getShopDetail(userStore.userInfo.shopId)
+  } catch { /* ignore */ }
+}
 
 async function fetchRevenue() {
   if (!userStore.userInfo?.shopId) return
@@ -180,6 +299,49 @@ function renderChart(data: DailyRevenue[]) {
   })
 }
 
+async function fetchComments() {
+  if (!userStore.userInfo?.shopId) return
+  commentLoading.value = true
+  try {
+    const result = await getComments({
+      shopId: userStore.userInfo.shopId,
+      filter: commentFilter.value as any,
+      page: commentPage.value,
+      pageSize: 10,
+    })
+    comments.value = result?.records || []
+    commentTotal.value = result?.total || 0
+    const ids = comments.value.map(c => c.id)
+    if (ids.length > 0) {
+      const results = await Promise.allSettled(
+        ids.map(id => checkCommentLikeStatus(id))
+      )
+      const set = new Set<number>()
+      results.forEach((r, i) => { if (r.status === 'fulfilled' && r.value) set.add(ids[i]) })
+      likedCommentIds.value = set
+    } else {
+      likedCommentIds.value = new Set()
+    }
+  } catch { /* ignore */ } finally {
+    commentLoading.value = false
+  }
+}
+
+async function handleLikeComment(comment: Comment) {
+  try {
+    await likeComment(comment.id)
+    const newSet = new Set(likedCommentIds.value)
+    if (newSet.has(comment.id)) {
+      comment.likes--
+      newSet.delete(comment.id)
+    } else {
+      comment.likes++
+      newSet.add(comment.id)
+    }
+    likedCommentIds.value = newSet
+  } catch { /* ignore */ }
+}
+
 async function fetchVouchers() {
   if (!userStore.userInfo?.shopId) return
   try {
@@ -223,8 +385,10 @@ async function handlePublishVoucher() {
 
 onMounted(() => {
   if (userStore.isMerchant) {
+    fetchShopInfo()
     fetchRevenue()
     fetchVouchers()
+    fetchComments()
   }
 })
 </script>
@@ -254,6 +418,127 @@ onMounted(() => {
   justify-content: center;
 }
 
+/* 店铺信息 */
+.shop-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.shop-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.shop-info-label {
+  font-size: 13px;
+  color: #909399;
+}
+
+.shop-info-value {
+  font-size: 15px;
+  color: #303133;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 评价 */
+.review-filters {
+  margin-bottom: 12px;
+}
+
+.review-list {
+  min-height: 100px;
+}
+
+.review-item {
+  padding: 14px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.review-item:last-child {
+  border-bottom: none;
+}
+
+.review-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.review-user-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.review-username {
+  font-size: 14px;
+  color: #303133;
+  font-weight: 500;
+}
+
+.review-time {
+  font-size: 12px;
+  color: #c0c4cc;
+}
+
+.review-body {
+  font-size: 14px;
+  color: #606266;
+  line-height: 1.5;
+  margin-bottom: 8px;
+  padding-left: 46px;
+}
+
+.review-images {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+  padding-left: 46px;
+}
+
+.review-thumb {
+  width: 80px;
+  height: 80px;
+  border-radius: 4px;
+}
+
+.review-footer {
+  display: flex;
+  padding-left: 46px;
+}
+
+.like-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: #909399;
+  cursor: pointer;
+  user-select: none;
+}
+
+.like-btn:hover {
+  color: #409eff;
+}
+
+.like-btn.liked {
+  color: #409eff;
+}
+
+.pagination-area {
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+/* 优惠卷 */
 .voucher-list {
   display: flex;
   flex-direction: column;
