@@ -7,10 +7,14 @@ import com.wjh.constant.MessageConstant;
 import com.wjh.constant.RedisConstant;
 import com.wjh.context.BaseContext;
 import com.wjh.dto.VoucherDTO;
+import com.wjh.entity.Shop;
 import com.wjh.entity.User;
 import com.wjh.entity.Voucher;
+import com.wjh.entity.VoucherOrder;
+import com.wjh.mapper.ShopMapper;
 import com.wjh.mapper.UserMapper;
 import com.wjh.mapper.VoucherMapper;
+import com.wjh.mapper.VoucherOrderMapper;
 import com.wjh.result.Result;
 import com.wjh.service.VoucherService;
 import com.wjh.vo.VoucherOrderVO;
@@ -19,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -32,6 +37,10 @@ public class VoucherServiceImpl implements VoucherService {
     private ObjectMapper objectMapper;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private VoucherOrderMapper voucherOrderMapper;
+    @Autowired
+    private ShopMapper shopMapper;
 
     @Override
     public List<Voucher> getVoucherList(Long shopId) {
@@ -93,7 +102,25 @@ public class VoucherServiceImpl implements VoucherService {
     }
 
     @Override
-    public Result<VoucherOrderVO> getVoucherOrder(Long userId) {
-
+    public Result<List<VoucherOrderVO>> getVoucherOrder(Long userId) {
+        List<VoucherOrder> voucherOrderList = voucherOrderMapper.getByUserId(userId);
+        if (voucherOrderList == null || voucherOrderList.isEmpty()) {
+            return Result.success(Collections.emptyList());
+        }
+        List<VoucherOrderVO> res = voucherOrderList.stream().map(voucherOrder -> {
+            Shop shop = shopMapper.getById(voucherOrder.getShopId());
+            Voucher voucher = voucherMapper.getById(voucherOrder.getVoucherId());
+            return VoucherOrderVO.builder()
+                    .id(voucherOrder.getId())
+                    .userId(voucherOrder.getUserId())
+                    .voucherId(voucherOrder.getVoucherId())
+                    .voucherPrice(voucher.getPrice())
+                    .voucherValue(voucher.getValue())
+                    .shopName(shop.getName())
+                    .status(voucherOrder.getStatus())
+                    .orderTime(voucherOrder.getOrderTime())
+                    .build();
+        }).toList();
+        return Result.success(res);
     }
 }

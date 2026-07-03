@@ -35,7 +35,7 @@ public class VoucherController {
     }
 
     @GetMapping("/user/{userId}")
-    public Result<VoucherOrderVO> getVoucherOrder(@PathVariable Long userId) {
+    public Result<List<VoucherOrderVO>> getVoucherOrder(@PathVariable Long userId) {
         return voucherService.getVoucherOrder(userId);
     }
 }

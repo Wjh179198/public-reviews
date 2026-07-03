@@ -15,5 +15,5 @@ public interface VoucherService {
 
     List<Voucher> getShopVouchers(Long shopId);
 
-    Result<VoucherOrderVO> getVoucherOrder(Long userId);
+    Result<List<VoucherOrderVO>> getVoucherOrder(Long userId);
 }
