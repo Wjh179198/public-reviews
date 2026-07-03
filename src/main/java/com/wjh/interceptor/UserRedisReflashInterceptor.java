@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wjh.constant.RedisConstant;
 import com.wjh.context.BaseContext;
 import com.wjh.dto.UserDTO;
+import com.wjh.result.Result;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -37,6 +38,16 @@ public class UserRedisReflashInterceptor implements HandlerInterceptor {
         }
         stringRedisTemplate.expire(RedisConstant.USER_LOGIN_KEY + token, RedisConstant.USER_LOGIN_EXPIRE, TimeUnit.SECONDS);
         UserDTO userDTO = objectMapper.readValue(json, UserDTO.class);
+        String banKey = RedisConstant.BAN_USER_KEY;
+        if (Boolean.TRUE.equals(stringRedisTemplate.opsForSet().isMember(banKey, userDTO.getId().toString()))) {
+            response.setStatus(403);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write(
+                    objectMapper.writeValueAsString(Result.error("用户已封禁"))
+            );
+            stringRedisTemplate.delete(RedisConstant.USER_LOGIN_KEY + token);
+            return false;
+        }
         BaseContext.setThreadLocal(userDTO);
         return true;
     }

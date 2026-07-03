@@ -6,6 +6,7 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.wjh.constant.MessageConstant;
 import com.wjh.constant.RedisConstant;
+import com.wjh.constant.UserStatusConstant;
 import com.wjh.dto.AdminDTO;
 import com.wjh.dto.AdminLoginDTO;
 import com.wjh.entity.Admin;
@@ -87,5 +88,18 @@ public class AdminServiceImpl implements AdminService {
         }
         user.setPassword(null);
         return Result.success(user);
+    }
+
+    @Override
+    public Result banUser(Long userId) {
+        User user = userMapper.getById(userId);
+        if(user == null) {
+            return Result.error(MessageConstant.USER_NOT_EXISTS);
+        }
+        user.setStatus(UserStatusConstant.BAN_USER);
+        userMapper.update(user);
+        String banKey = RedisConstant.BAN_USER_KEY;
+        stringRedisTemplate.opsForSet().add(banKey, userId.toString());
+        return Result.success("用户封禁成功");
     }
 }

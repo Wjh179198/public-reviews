@@ -12,4 +12,6 @@ public interface AdminService {
     Result<PageResult> UsersList(Long id, String name, Integer status, Integer page, Integer pageSize);
 
     Result<User> getUserById(Long userId);
+
+    Result banUser(Long userId);
 }
