@@ -25,3 +25,8 @@ export function createVoucher(data: CreateVoucherParams) {
 export function getManageVouchers(shopId: number) {
   return get<Voucher[]>(`/voucher/manage/${shopId}`)
 }
+
+// 检查优惠卷是否还有库存
+export function checkVoucherStock(voucherId: number) {
+  return get<boolean>(`/voucher/${voucherId}/stock`)
+}

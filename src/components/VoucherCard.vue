@@ -27,10 +27,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import type { Voucher } from '@/types'
 import { formatDate } from '@/utils'
 import { useUserStore } from '@/stores/user'
+import { checkVoucherStock } from '@/api/voucher'
 
 const props = defineProps<{
   voucher: Voucher
@@ -45,21 +46,27 @@ defineEmits<{
 const userStore = useUserStore()
 
 const now = new Date()
+const hasStock = ref(true)
+
+onMounted(async () => {
+  try {
+    hasStock.value = await checkVoucherStock(props.voucher.id)
+  } catch { /* ignore */ }
+})
 
 const isExpired = computed(() => new Date(props.voucher.endTime) < now)
 const notStarted = computed(() => new Date(props.voucher.beginTime) > now)
-const outOfStock = computed(() => props.voucher.stock <= 0)
 const noMoney = computed(() => (userStore.userInfo?.money || 0) < props.voucher.price)
 
 const isDisabled = computed(
-  () => isExpired.value || notStarted.value || outOfStock.value || noMoney.value || !!props.purchased
+  () => isExpired.value || notStarted.value || !hasStock.value || noMoney.value || !!props.purchased
 )
 
 const disabledMsg = computed(() => {
   if (props.purchased) return '已购买'
   if (notStarted.value) return '活动未开始'
   if (isExpired.value) return '已过期'
-  if (outOfStock.value) return '已抢光'
+  if (!hasStock.value) return '已抢光'
   if (noMoney.value) return '余额不足'
   return ''
 })
