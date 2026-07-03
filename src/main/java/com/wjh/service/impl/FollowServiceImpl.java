@@ -181,7 +181,7 @@ public class FollowServiceImpl implements FollowService {
                 message.put("followId", userId.toString());
                 stringRedisTemplate.opsForStream().add("stream.follow", message);
             } catch (Exception e) {
-                log.info("取消关注失败, 当前用户={} 关注用户={}", BaseContext.getThreadLocal().toString(), userId.toString());
+                log.info("取消关注失败, 当前用户={} 关注用户={}", BaseContext.getThreadLocal().toString(), userId);
                 stringRedisTemplate.opsForSet().add(key, BaseContext.getThreadLocal().getId().toString());
                 stringRedisTemplate.opsForSet().add(RedisConstant.USER_FOLLOW_KEY + BaseContext.getThreadLocal().getId().toString(), userId.toString());
                 return Result.error("取消关注失败");
@@ -197,7 +197,7 @@ public class FollowServiceImpl implements FollowService {
                 message.put("followId", userId.toString());
                 stringRedisTemplate.opsForStream().add("stream.follow", message);
             } catch (Exception e) {
-                log.info("关注失败, 当前用户={} 关注用户={}", BaseContext.getThreadLocal().toString(), userId.toString());
+                log.info("关注失败, 当前用户={} 关注用户={}", BaseContext.getThreadLocal().toString(), userId);
                 stringRedisTemplate.opsForSet().remove(key, BaseContext.getThreadLocal().getId().toString());
                 stringRedisTemplate.opsForSet().remove(RedisConstant.USER_FOLLOW_KEY + BaseContext.getThreadLocal().getId().toString(), userId.toString());
                 return Result.error("关注失败");

@@ -17,4 +17,8 @@ public class RedisConstant {
     public static final String BAN_USER_KEY = "user:ban";
     public static final String SHOP_VOUCHER_KEY = "shop:voucher";
     public static final Long SHOP_VOUCHER_EXPIRE = 60L * 10L;
+    public static final String VOUCHER_STOCK_KEY = "voucher:stock";
+    public static final String VOUCHER_BEGIN_KEY = "voucher:begin";
+    public static final String VOUCHER_END_KEY = "voucher:end";
+    public static final String VOUCHER_ORDER_KEY = "voucher:order";
 }

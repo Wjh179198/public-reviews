@@ -38,4 +38,14 @@ public class VoucherController {
     public Result<List<VoucherOrderVO>> getVoucherOrder(@PathVariable Long userId) {
         return voucherService.getVoucherOrder(userId);
     }
+
+    @GetMapping("/{voucherId}/stock")
+    public Result<Boolean> getVoucherStock (@PathVariable Long voucherId) {
+        return voucherService.getVoucherStock(voucherId);
+    }
+
+    @PostMapping("/grab/{voucherId}")
+    public Result grabVoucher(@PathVariable Long voucherId) {
+        return voucherService.grabVoucher(voucherId);
+    }
 }

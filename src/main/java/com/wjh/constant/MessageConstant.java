@@ -15,7 +15,6 @@ public class MessageConstant {
     public static final String LOGIN_SUCCESS = "登录成功";
     public static final String RECHARGE_AMOUNT_ERROR = "充值金额必须大于0";
     public static final String RECHARGE_SUCCESS = "充值成功";
-
     public static final String RECHARGE_FAIL = "充值失败,请稍后重试";
     public static final String COMMENT_NOT_EXISTS = "评论不存在";
     public static final String SHOP_NOT_EXISTS = "店铺不存在";
@@ -26,4 +25,11 @@ public class MessageConstant {
     public static final Object BLOG_DELETE_SUCCESS = "博客删除成功";
     public static final String UNKNOWN_ERROR = "未知错误";
     public static final String USER_BAN_ERROR = "用户被封禁";
+    public static final String VOUCHER_NOT_EXISTS = "优惠券不存在";
+    public static final String VOUCHER_NOT_BEGIN = "优惠券活动未开始";
+    public static final String VOUCHER_ENDED = "优惠券活动已结束";
+    public static final String VOUCHER_STOCK_END = "优惠券库存不足";
+    public static final String VOUCHER_ALREADY_CLAIMED = "用户已购买过该优惠券";
+    public static final String MONEY_INVALID = "余额不足";
+    public static final String VOUCHER_CLAIM_FAILED = "优惠券购买失败";
 }
