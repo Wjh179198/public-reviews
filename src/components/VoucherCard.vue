@@ -11,7 +11,7 @@
       <div class="voucher-info">
         <p>价格：<span class="price">¥{{ voucher.price }}</span></p>
         <p>有效期：{{ formatDate(voucher.beginTime) }} ~ {{ formatDate(voucher.endTime) }}</p>
-        <p>库存：{{ voucher.stock }}张</p>
+        <p v-if="showStock">库存：{{ voucher.stock }}张</p>
         <p v-if="isDisabled" class="disabled-msg">{{ disabledMsg }}</p>
       </div>
       <el-button
@@ -35,6 +35,7 @@ import { useUserStore } from '@/stores/user'
 const props = defineProps<{
   voucher: Voucher
   purchased?: boolean
+  showStock?: boolean
 }>()
 
 defineEmits<{

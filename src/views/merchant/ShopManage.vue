@@ -154,7 +154,7 @@
           <div class="card-wrapper">
             <h3 class="section-title">我的优惠卷</h3>
             <div v-if="manageVouchers.length" class="voucher-list">
-              <VoucherCard v-for="v in manageVouchers" :key="v.id" :voucher="v" />
+              <VoucherCard v-for="v in manageVouchers" :key="v.id" :voucher="v" :show-stock="true" />
             </div>
             <el-empty v-else description="暂无优惠卷" :image-size="60" />
           </div>
