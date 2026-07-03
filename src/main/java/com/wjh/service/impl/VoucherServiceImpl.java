@@ -8,6 +8,7 @@ import com.wjh.constant.RedisConstant;
 import com.wjh.constant.VoucherStatusConstant;
 import com.wjh.context.BaseContext;
 import com.wjh.dto.VoucherDTO;
+import com.wjh.dto.VoucherRedis;
 import com.wjh.entity.Shop;
 import com.wjh.entity.User;
 import com.wjh.entity.Voucher;
@@ -29,7 +30,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.connection.stream.*;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
-import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -155,10 +155,8 @@ public class VoucherServiceImpl implements VoucherService {
         voucherOrder.setStatus(VoucherStatusConstant.AVAILABLE);
         voucherOrder.setOrderTime(LocalDateTime.now());
         voucherOrderMapper.insert(voucherOrder);
-        User user = userMapper.getById(userId);
-        BigDecimal money = user.getMoney();
-        user.setMoney(money.subtract(voucherPrice));
-        userMapper.update(user);
+        BigDecimal money = getMoneyFromRedis(userId);
+        setMoneyToRedis(userId, money.subtract(voucherPrice));
         stringRedisTemplate.opsForStream().acknowledge("stream.voucher", "voucher_consumer", msgId);
     }
 
@@ -203,6 +201,12 @@ public class VoucherServiceImpl implements VoucherService {
         stringRedisTemplate.opsForValue().set(RedisConstant.VOUCHER_STOCK_KEY + voucher.getId(), voucher.getStock().toString(), seconds, TimeUnit.SECONDS);
         stringRedisTemplate.opsForValue().set(RedisConstant.VOUCHER_BEGIN_KEY + voucher.getId(), voucher.getBeginTime().toString(), seconds, TimeUnit.SECONDS);
         stringRedisTemplate.opsForValue().set(RedisConstant.VOUCHER_END_KEY + voucher.getId(), voucher.getEndTime().toString(), seconds, TimeUnit.SECONDS);
+        VoucherRedis voucherRedis = new VoucherRedis(voucher.getId(), voucher.getShopId(), voucher.getPrice());
+        try {
+            stringRedisTemplate.opsForValue().set(RedisConstant.VOUCHER_KEY + voucher.getId(), objectMapper.writeValueAsString(voucherRedis), seconds, TimeUnit.SECONDS);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         return Result.success("发布成功", voucher);
     }
 
@@ -261,11 +265,22 @@ public class VoucherServiceImpl implements VoucherService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result grabVoucher(Long voucherId) {
-        Voucher voucher = voucherMapper.getById(voucherId);
-        if(voucher == null) {
+        String key = RedisConstant.VOUCHER_KEY + voucherId;
+        String json = stringRedisTemplate.opsForValue().get(key);
+        if (json == null || json.isEmpty()) {
             return Result.error(MessageConstant.VOUCHER_NOT_EXISTS);
         }
+        VoucherRedis voucherRedis = null;
+        try {
+            voucherRedis = objectMapper.readValue(json, VoucherRedis.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         Long userId = BaseContext.getThreadLocal().getId();
+        BigDecimal money = getMoneyFromRedis(userId);
+        if (money.compareTo(voucherRedis.getPrice()) < 0) {
+            return Result.error(MessageConstant.MONEY_INVALID);
+        }
         Long res = stringRedisTemplate.execute(SECKILL_SCRIPT, Collections.emptyList(), voucherId.toString(), userId.toString(), LocalDateTime.now().toString());
         int value = res.intValue();
         if(value == 1) {
@@ -280,16 +295,12 @@ public class VoucherServiceImpl implements VoucherService {
         if(value == 4) {
             return Result.error(MessageConstant.VOUCHER_ALREADY_CLAIMED);
         }
-        User user = userMapper.getById(userId);
-        if (user.getMoney().compareTo(voucher.getPrice()) < 0) {
-            return Result.error(MessageConstant.MONEY_INVALID);
-        }
         try {
             Map<String, String> map = new HashMap<>();
             map.put("voucherId", voucherId.toString());
             map.put("userId", userId.toString());
-            map.put("shopId", voucher.getShopId().toString());
-            map.put("voucherPrice", voucher.getPrice().toString());
+            map.put("shopId", voucherRedis.getShopId().toString());
+            map.put("voucherPrice", voucherRedis.getPrice().toString());
             stringRedisTemplate.opsForStream().add("stream.voucher", map);
         } catch (Exception e) {
             log.info("购买优惠卷失败,下单用户id={}, 优惠卷id={}", userId, voucherId);
@@ -298,5 +309,14 @@ public class VoucherServiceImpl implements VoucherService {
             return Result.error(MessageConstant.VOUCHER_CLAIM_FAILED);
         }
         return Result.success("购买成功");
+    }
+
+    private BigDecimal getMoneyFromRedis(Long userId) {
+        String moneyStr = (String) stringRedisTemplate.opsForHash().get(RedisConstant.USER_MONEY_KEY, userId.toString());
+        return moneyStr != null ? new BigDecimal(moneyStr) : BigDecimal.ZERO;
+    }
+
+    private void setMoneyToRedis(Long userId, BigDecimal money) {
+        stringRedisTemplate.opsForHash().put(RedisConstant.USER_MONEY_KEY, userId.toString(), money.toString());
     }
 }

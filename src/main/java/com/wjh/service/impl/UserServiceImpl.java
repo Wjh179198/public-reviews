@@ -85,6 +85,7 @@ public class UserServiceImpl implements UserService {
         stringRedisTemplate.delete(key);
         stringRedisTemplate.opsForSet().add(RedisConstant.USER_FOLLOW_KEY + user.getId().toString(), "0");
         stringRedisTemplate.opsForSet().add(RedisConstant.USER_FAN_KEY + user.getId().toString(), "0");
+        stringRedisTemplate.opsForHash().put(RedisConstant.USER_MONEY_KEY, user.getId().toString(), "0");
         return Result.success("注册成功");
     }
 
@@ -318,6 +319,7 @@ public class UserServiceImpl implements UserService {
             BigDecimal newMoney = user.getMoney().add(amount);
             user.setMoney(newMoney);
             userMapper.update(user);
+            stringRedisTemplate.opsForHash().put(RedisConstant.USER_MONEY_KEY, BaseContext.getThreadLocal().getId().toString(), newMoney.toString());
             return Result.success(MessageConstant.RECHARGE_SUCCESS, newMoney);
         } catch (Exception e) {
             log.info("充值失败: {}", e.getMessage());

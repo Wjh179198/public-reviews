@@ -14,6 +14,7 @@ public class RedisConstant {
     public static final String BLOG_KEY = "shop:blog";
     public static final String ADMIN_LOGIN_KEY = "admin:login";
     public static final Long ADMIN_LOGIN_EXPIRE = 60L * 60L * 2L;
+    public static final String USER_MONEY_KEY = "user:money";
     public static final String BAN_USER_KEY = "user:ban";
     public static final String SHOP_VOUCHER_KEY = "shop:voucher";
     public static final Long SHOP_VOUCHER_EXPIRE = 60L * 10L;
@@ -21,4 +22,5 @@ public class RedisConstant {
     public static final String VOUCHER_BEGIN_KEY = "voucher:begin";
     public static final String VOUCHER_END_KEY = "voucher:end";
     public static final String VOUCHER_ORDER_KEY = "voucher:order";
+    public static final String VOUCHER_KEY = "voucher";
 }
