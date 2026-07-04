@@ -158,8 +158,8 @@ function goUser(userId: number) {
   router.push(`/user/${userId}`)
 }
 
-function handleLogout() {
-  userStore.logout()
+async function handleLogout() {
+  await userStore.logout()
   router.push('/login')
 }
 

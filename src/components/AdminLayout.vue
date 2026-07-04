@@ -53,8 +53,8 @@ const adminStore = useAdminStore()
 
 const activeMenu = computed(() => route.path)
 
-function handleLogout() {
-  adminStore.logout()
+async function handleLogout() {
+  await adminStore.logout()
   router.push('/admin/login')
 }
 </script>
