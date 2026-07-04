@@ -38,4 +38,5 @@ public class MessageConstant {
     public static final String VOUCHER_USED = "该优惠卷已被使用过";
     public static final String SHOP_OWNER_BAN = "店铺 owners 被封禁, 无法购买";
     public static final String ORDER_FAIL = "下单失败,请稍后重试";
+    public static final String VOUCHER_NOT_BUY_THIS_SHOP = "用户未购买过该店铺的优惠券";
 }

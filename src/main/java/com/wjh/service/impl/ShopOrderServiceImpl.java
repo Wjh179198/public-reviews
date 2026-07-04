@@ -71,6 +71,9 @@ public class ShopOrderServiceImpl implements ShopOrderService {
                 if (voucherOrder.getStatus().equals(VoucherStatusConstant.USED)) {
                     return Result.error(MessageConstant.VOUCHER_USED);
                 }
+                if(!voucherOrder.getShopId().equals(shopOrderDTO.getShopId())) {
+                    return Result.error(MessageConstant.VOUCHER_NOT_BUY_THIS_SHOP);
+                }
                 money = money.subtract(voucher.getValue());
             }
             userMoney = MoneyUtil.getMoney(userId, stringRedisTemplate);
@@ -102,7 +105,7 @@ public class ShopOrderServiceImpl implements ShopOrderService {
             shopOrder.setUserId(userId);
             shopOrder.setVoucherId(shopOrderDTO.getVoucherId());
             shopOrder.setPrice(money);
-            shopOrder.setStatus(0);
+            shopOrder.setStatus(1);
             shopOrder.setOrderTime(LocalDateTime.now());
             shopOrderMapper.insert(shopOrder);
             //构建返回对象

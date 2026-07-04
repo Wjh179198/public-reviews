@@ -4,6 +4,10 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.wjh.mapper.ShopOrderMapper">
     <select id="getByUserId" resultType="com.wjh.vo.ShopOrderVO">
-        select * from
+        select so.*, s.name as shopName, v.value as voucherValue from shop_order as so, shop as s, voucher as v
+        where so.voucher_id = v.id and so.shop_id = s.id
+          and so.user_id = #{userId}
+          and so.status = #{status}
+        order by so.order_time desc
     </select>
 </mapper>

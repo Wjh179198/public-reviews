@@ -19,6 +19,6 @@ public interface VoucherOrderMapper {
     @Select("SELECT * FROM voucher_order WHERE user_id = #{userId} AND voucher_id = #{id}")
     VoucherOrder getByUserIdAndVoucherId(Long userId, Long id);
 
-    @Update("UPDATE voucher_order SET status = #{status} WHERE id = #{id}")
+    @Update("UPDATE voucher_order SET status = #{status} WHERE voucher_id = #{id}")
     void updateStatus(Long id, Integer status);
 }
