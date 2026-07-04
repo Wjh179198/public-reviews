@@ -1,0 +1,75 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
+  color: #333;
+}
+
+body {
+  background-color: #f5f7fa;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* 通用内容区域 */
+.page-container {
+  padding: 20px;
+}
+
+/* 卡片样式 */
+.card-wrapper {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* 弹性布局 */
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* 文字省略 */
+.text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 评分颜色 */
+.score-good {
+  color: #e6a23c;
+}
+
+.score-mid {
+  color: #909399;
+}
+
+.score-bad {
+  color: #c0c4cc;
+}
+
+/* Element Plus 覆盖 */
+.el-menu {
+  border-right: none !important;
+}
