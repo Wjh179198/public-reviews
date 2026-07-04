@@ -9,12 +9,16 @@ import com.wjh.constant.UserStatusConstant;
 import com.wjh.context.BaseContext;
 import com.wjh.dto.ShopRegisterDTO;
 import com.wjh.entity.Shop;
+import com.wjh.entity.ShopOrder;
 import com.wjh.entity.ShopType;
 import com.wjh.entity.User;
 import com.wjh.mapper.ShopMapper;
+import com.wjh.mapper.ShopOrderMapper;
 import com.wjh.mapper.UserMapper;
 import com.wjh.result.PageResult;
 import com.wjh.service.ShopService;
+import com.wjh.vo.ShopOrderVO;
+import com.wjh.vo.ShopRevenue;
 import com.wjh.vo.ShopTypeVO;
 import com.wjh.vo.ShopVO;
 import org.springframework.beans.BeanUtils;
@@ -24,7 +28,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,6 +47,8 @@ public class ShopServiceImpl implements ShopService {
     private ObjectMapper objectMapper;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private ShopOrderMapper shopOrderMapper;
 
     @Override
     public List<ShopTypeVO> getShopTypes() {
@@ -114,5 +124,25 @@ public class ShopServiceImpl implements ShopService {
     public List<ShopVO> searchShops(String keyword) {
         List<ShopVO> shopVOList = shopMapper.getListByName(keyword);
         return shopVOList;
+    }
+
+    @Override
+    public List<ShopRevenue> getShopRevenue(Long shopId) {
+        LocalDate endDay = LocalDate.now();
+        LocalDate startDay = LocalDate.now().plusDays(-6);
+        LocalDateTime startDateTime = LocalDateTime.of(startDay, LocalTime.MIN);
+        LocalDateTime endDateTime = LocalDateTime.of(endDay, LocalTime.MAX);
+        List<ShopOrder> shopOrderList = shopOrderMapper.getShopRevenue(shopId, startDateTime, endDateTime);
+        List<ShopRevenue> res = new ArrayList<>();
+        for(int i = 0; i < 7; i++) {
+            res.add(new ShopRevenue(startDay.plusDays(i), BigDecimal.valueOf(0)));
+        }
+        if(shopOrderList != null && !shopOrderList.isEmpty()) {
+            for(ShopOrder shopOrder : shopOrderList) {
+                int index = (int) ChronoUnit.DAYS.between(startDay, shopOrder.getOrderTime().toLocalDate());
+                res.get(index).setAmount(res.get(index).getAmount().add(shopOrder.getPrice()));
+            }
+        }
+        return res;
     }
 }

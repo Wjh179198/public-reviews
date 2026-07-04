@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper
@@ -24,4 +25,7 @@ public interface ShopOrderMapper {
 
     @Update("update shop_order set status = #{status} where id = #{orderId}")
     void updateStatusById(Long orderId, int status);
+
+    @Select("select * from shop_order where shop_id = #{shopId} and status = 1 and order_time >= #{startDateTime} and order_time <= #{endDateTime}")
+    List<ShopOrder> getShopRevenue(Long shopId, LocalDateTime startDateTime, LocalDateTime endDateTime);
 }

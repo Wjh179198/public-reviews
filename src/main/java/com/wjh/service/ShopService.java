@@ -3,6 +3,7 @@ package com.wjh.service;
 import com.wjh.dto.ShopRegisterDTO;
 import com.wjh.entity.Shop;
 import com.wjh.result.PageResult;
+import com.wjh.vo.ShopRevenue;
 import com.wjh.vo.ShopTypeVO;
 import com.wjh.vo.ShopVO;
 
@@ -19,4 +20,6 @@ public interface ShopService {
     ShopVO getShopById(Long shopId);
 
     List<ShopVO> searchShops(String keyword);
+
+    List<ShopRevenue> getShopRevenue(Long shopId);
 }

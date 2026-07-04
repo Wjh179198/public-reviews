@@ -5,6 +5,7 @@ import com.wjh.entity.Shop;
 import com.wjh.result.PageResult;
 import com.wjh.result.Result;
 import com.wjh.service.ShopService;
+import com.wjh.vo.ShopRevenue;
 import com.wjh.vo.ShopTypeVO;
 import com.wjh.vo.ShopVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,5 +49,10 @@ public class ShopController {
     public Result<List<ShopVO>> searchShops(@RequestParam String keyword) {
         List<ShopVO> shopVOList = shopService.searchShops(keyword);
         return Result.success(shopVOList);
+    }
+
+    @GetMapping("/{shopId}/revenue")
+    public Result<List<ShopRevenue>> getShopRevenue (@PathVariable Long shopId) {
+        return Result.success(shopService.getShopRevenue(shopId));
     }
 }
