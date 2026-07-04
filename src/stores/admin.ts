@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { Admin } from '@/types'
-import { adminLogin as doLogin, getAdminInfo } from '@/api/admin'
+import { adminLogin as doLogin, getAdminInfo, adminLogout } from '@/api/admin'
 import type { AdminLoginParams } from '@/types'
 
 export const useAdminStore = defineStore('admin', () => {
@@ -28,7 +28,8 @@ export const useAdminStore = defineStore('admin', () => {
     return admin
   }
 
-  function logout() {
+  async function logout() {
+    try { await adminLogout() } catch { /* ignore */ }
     token.value = ''
     adminInfo.value = null
     localStorage.removeItem('adminToken')

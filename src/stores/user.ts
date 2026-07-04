@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { User } from '@/types'
 import { getUserInfo as fetchUserInfo } from '@/api/user'
-import { loginByPassword, loginByCode, register, sendCode } from '@/api/auth'
+import { loginByPassword, loginByCode, register, sendCode, logout as logoutApi } from '@/api/auth'
 import type {
   LoginByPasswordParams,
   LoginByCodeParams,
@@ -52,7 +52,8 @@ export const useUserStore = defineStore('user', () => {
     return user
   }
 
-  function logout() {
+  async function logout() {
+    try { await logoutApi() } catch { /* ignore */ }
     token.value = ''
     userInfo.value = null
     localStorage.removeItem('token')

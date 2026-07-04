@@ -46,3 +46,8 @@ export function updateAdminInfo(data: { name?: string; password?: string }) {
 export function getAdminInfo() {
   return get('/admin/info')
 }
+
+// 管理员退出
+export function adminLogout() {
+  return post('/admin/logout')
+}

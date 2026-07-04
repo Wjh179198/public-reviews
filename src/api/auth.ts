@@ -25,3 +25,8 @@ export function sendCode(phone: string) {
 export function register(params: RegisterParams) {
   return post('/user/register', params)
 }
+
+// 退出登录
+export function logout() {
+  return post('/user/logout')
+}
