@@ -169,7 +169,7 @@
               v-for="v in myVouchers"
               :key="v.id"
               :label="`¥${v.voucherValue} 优惠卷`"
-              :value="v.id"
+              :value="v.voucherId"
             />
           </el-select>
         </div>
@@ -250,7 +250,7 @@ const booking = ref(false)
 const finalPrice = computed(() => {
   let price = shop.value?.price || 0
   if (selectedVoucherId.value) {
-    const v = myVouchers.value.find((vo) => vo.id === selectedVoucherId.value)
+    const v = myVouchers.value.find((vo) => vo.voucherId === selectedVoucherId.value)
     if (v?.voucherValue) {
       price = Math.max(0, price - v.voucherValue)
     }
