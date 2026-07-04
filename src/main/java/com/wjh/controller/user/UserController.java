@@ -3,6 +3,7 @@ package com.wjh.controller.user;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.wjh.constant.RedisConstant;
+import com.wjh.context.BaseContext;
 import com.wjh.dto.UserLoginDTO;
 import com.wjh.dto.UserRegisterDTO;
 import com.wjh.dto.UserUpdateDTO;
@@ -55,6 +56,7 @@ public class UserController {
             token = token.substring(7);
         }
         stringRedisTemplate.delete(RedisConstant.USER_LOGIN_KEY + token);
+        BaseContext.removeThreadLocal();
         return Result.success("已退出");
     }
 

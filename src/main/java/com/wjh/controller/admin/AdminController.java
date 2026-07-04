@@ -1,6 +1,7 @@
 package com.wjh.controller.admin;
 
 import com.wjh.constant.RedisConstant;
+import com.wjh.context.AdminBaseContext;
 import com.wjh.dto.AdminLoginDTO;
 import com.wjh.entity.User;
 import com.wjh.result.PageResult;
@@ -33,6 +34,7 @@ public class AdminController {
             token = token.substring(7);
         }
         stringRedisTemplate.delete(RedisConstant.USER_LOGIN_KEY + token);
+        AdminBaseContext.remove();
         return Result.success("已退出");
     }
 

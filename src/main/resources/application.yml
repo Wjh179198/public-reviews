@@ -1,0 +1,45 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: public-reviews
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/public_reviews
+    username: root
+    password: Wjh1113@
+  data:
+    redis:
+      host: 115.29.237.141
+      port: 7000
+      password: 123456
+      timeout: 5s
+      lettuce:
+        pool:
+          enabled: true
+          max-active: 8
+          max-idle: 4
+reviews:
+  jwt:
+    # 设置jwt签名加密时使用的秘钥
+    secret-key: itcast
+    # 设置jwt过期时间
+    ttl: 7200000
+    # 设置前端传递过来的令牌名称
+    token-name: token
+  aliyun:
+    access-key-id: LTAI5t9p7WMpqRhehf6JLL82
+    access-key-secret: bAxcwwBJu6cf5ixbCKAeHLyKxJDINm
+    bucket-name: javaweb-wjh
+    endpoint: oss-cn-hangzhou.aliyuncs.com
+
+logging:
+  level:
+    com.wjh: INFO
+    io.lettuce.core: WARN
+    io.netty.channel.nio: WARN
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+  type-aliases-package: com.wjh.entity
