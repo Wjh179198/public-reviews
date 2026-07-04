@@ -10,4 +10,6 @@ public interface ShopOrderService {
     Result<ShopOrderVO> createOrder(ShopOrderDTO shopOrderDTO);
 
     Result<PageResult> getOrderListByUserId(Long userId, Integer status, Integer page, Integer pageSize);
+
+    Result refundOrder(Long orderId);
 }

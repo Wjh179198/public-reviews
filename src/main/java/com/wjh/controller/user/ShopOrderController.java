@@ -24,4 +24,9 @@ public class ShopOrderController {
     public Result<PageResult> getOrderListByUserId (@PathVariable Long userId, @RequestParam Integer status, @RequestParam Integer page, @RequestParam Integer pageSize) {
         return shopOrderService.getOrderListByUserId(userId, status, page, pageSize);
     }
+
+    @PostMapping("/refund/{orderId}")
+    public Result refundOrder (@PathVariable Long orderId) {
+        return shopOrderService.refundOrder(orderId);
+    }
 }

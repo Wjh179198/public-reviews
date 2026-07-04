@@ -4,6 +4,8 @@ import com.wjh.entity.ShopOrder;
 import com.wjh.vo.ShopOrderVO;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -17,4 +19,9 @@ public interface ShopOrderMapper {
 
     List<ShopOrderVO> getByUserId(Long userId, Integer status);
 
+    @Select("select * from shop_order where user_id = #{userId} and id = #{orderId}")
+    ShopOrder getOrderByUserIdAndOrderId(Long userId, Long orderId);
+
+    @Update("update shop_order set status = #{status} where id = #{orderId}")
+    void updateStatusById(Long orderId, int status);
 }

@@ -39,4 +39,8 @@ public class MessageConstant {
     public static final String SHOP_OWNER_BAN = "店铺 owners 被封禁, 无法购买";
     public static final String ORDER_FAIL = "下单失败,请稍后重试";
     public static final String VOUCHER_NOT_BUY_THIS_SHOP = "用户未购买过该店铺的优惠券";
+    public static final String ORDER_NOT_EXISTS = "订单不存在";
+    public static final String NO_PERMISSION_REFUND = "没有权限申请退款";
+    public static final String REFUND_SUCCESS = "退款成功";
+    public static final String REFUND_FAIL = "退款失败";
 }

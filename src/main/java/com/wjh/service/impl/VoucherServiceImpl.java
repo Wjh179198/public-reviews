@@ -161,6 +161,9 @@ public class VoucherServiceImpl implements VoucherService {
             stringRedisTemplate.opsForStream().acknowledge("stream.voucher", "voucher_consumer", msgId);
             return;
         }
+        User userByShopId = userMapper.getByShopId(shopId);
+        BigDecimal shopMoney = userByShopId.getMoney();
+        MoneyUtil.setMoney(userByShopId.getId(), shopMoney.add(voucherPrice), stringRedisTemplate);
         BigDecimal money = MoneyUtil.getMoney(userId, stringRedisTemplate);
         MoneyUtil.setMoney(userId, money.subtract(voucherPrice), stringRedisTemplate);
         try {
@@ -173,6 +176,7 @@ public class VoucherServiceImpl implements VoucherService {
             userMapper.update(user1);
         } catch (Exception e) {
             MoneyUtil.setMoney(userId, money, stringRedisTemplate);
+            MoneyUtil.setMoney(userByShopId.getId(), shopMoney.subtract(voucherPrice), stringRedisTemplate);
             throw e;
         }
         stringRedisTemplate.opsForStream().acknowledge("stream.voucher", "voucher_consumer", msgId);

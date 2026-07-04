@@ -87,6 +87,7 @@ public class ShopOrderServiceImpl implements ShopOrderService {
             //更新商家用户余额
             userByShopId.setMoney(userByShopId.getMoney().add(money));
             userMapper.update(userByShopId);
+            MoneyUtil.setMoney(userByShopId.getId(), userByShopId.getMoney().add(money), stringRedisTemplate);
             //更新用户余额
             MoneyUtil.setMoney(userId, userMoney.subtract(money), stringRedisTemplate);
             User user = userMapper.getById(userId);
@@ -132,5 +133,48 @@ public class ShopOrderServiceImpl implements ShopOrderService {
         List<ShopOrderVO> shopOrderVOList = shopOrderMapper.getByUserId(userId, status);
         Page<ShopOrderVO> shopOrderVOPage = (Page<ShopOrderVO>) shopOrderVOList;
         return Result.success(new PageResult(shopOrderVOPage.getTotal(), shopOrderVOPage.getResult(), shopOrderVOPage.getPages(), pageSize));
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result refundOrder(Long orderId) {
+        Long userId = BaseContext.getThreadLocal().getId();
+        String lockKey = LOCK_PREFIX + userId;
+        Boolean locked = stringRedisTemplate.opsForValue().setIfAbsent(lockKey, "1", Duration.ofSeconds(LOCK_TIMEOUT));
+        if (Boolean.FALSE.equals(locked)) {
+            return Result.error(MessageConstant.ORDER_PROCESSING);
+        }
+        BigDecimal useMoney = null;
+        try {
+            ShopOrder shopOrder = shopOrderMapper.getOrderByUserIdAndOrderId(userId, orderId);
+            if(shopOrder == null) {
+                return Result.error(MessageConstant.ORDER_NOT_EXISTS);
+            }
+            if(!BaseContext.getThreadLocal().getId().equals(shopOrder.getUserId())) {
+                return Result.error(MessageConstant.NO_PERMISSION_REFUND);
+            }
+            //更新订单状态
+            shopOrderMapper.updateStatusById(orderId, 2);
+            //更新商家用户余额
+            useMoney = shopOrder.getPrice();
+            User userByShopId = userMapper.getByShopId(shopOrder.getShopId());
+            userByShopId.setMoney(userByShopId.getMoney().subtract(useMoney));
+            userMapper.update(userByShopId);
+            MoneyUtil.setMoney(userByShopId.getId(), userByShopId.getMoney().subtract(useMoney), stringRedisTemplate);
+            //更新用户余额
+            User user = userMapper.getById(shopOrder.getUserId());
+            user.setMoney(user.getMoney().add(useMoney));
+            userMapper.update(user);
+            MoneyUtil.setMoney(shopOrder.getUserId(), user.getMoney(), stringRedisTemplate);
+            //修改优惠卷状态
+            if (shopOrder.getVoucherId() != null) {
+                voucherOrderMapper.updateStatus(shopOrder.getVoucherId(), VoucherStatusConstant.AVAILABLE);
+            }
+        } catch (Exception e) {
+            return Result.error(MessageConstant.REFUND_FAIL);
+        } finally {
+            stringRedisTemplate.delete(lockKey);
+        }
+        return Result.success(MessageConstant.REFUND_SUCCESS);
     }
 }
