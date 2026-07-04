@@ -19,6 +19,7 @@ import com.wjh.mapper.VoucherMapper;
 import com.wjh.mapper.VoucherOrderMapper;
 import com.wjh.result.Result;
 import com.wjh.service.VoucherService;
+import com.wjh.utils.MoneyUtil;
 import com.wjh.vo.VoucherOrderVO;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -160,8 +161,8 @@ public class VoucherServiceImpl implements VoucherService {
             stringRedisTemplate.opsForStream().acknowledge("stream.voucher", "voucher_consumer", msgId);
             return;
         }
-        BigDecimal money = getMoneyFromRedis(userId);
-        setMoneyToRedis(userId, money.subtract(voucherPrice));
+        BigDecimal money = MoneyUtil.getMoney(userId, stringRedisTemplate);
+        MoneyUtil.setMoney(userId, money.subtract(voucherPrice), stringRedisTemplate);
         try {
             voucherMapper.decrementStock(voucherId);
             User user = userMapper.getById(userId);
@@ -171,7 +172,7 @@ public class VoucherServiceImpl implements VoucherService {
             user1.setMoney(user1.getMoney().add(voucherPrice));
             userMapper.update(user1);
         } catch (Exception e) {
-            setMoneyToRedis(userId, money);
+            MoneyUtil.setMoney(userId, money, stringRedisTemplate);
             throw e;
         }
         stringRedisTemplate.opsForStream().acknowledge("stream.voucher", "voucher_consumer", msgId);
@@ -285,7 +286,7 @@ public class VoucherServiceImpl implements VoucherService {
             throw new RuntimeException(e);
         }
         Long userId = BaseContext.getThreadLocal().getId();
-        BigDecimal money = getMoneyFromRedis(userId);
+        BigDecimal money = MoneyUtil.getMoney(userId, stringRedisTemplate);
         if (money.compareTo(voucherRedis.getPrice()) < 0) {
             return Result.error(MessageConstant.MONEY_INVALID);
         }
@@ -317,14 +318,5 @@ public class VoucherServiceImpl implements VoucherService {
             return Result.error(MessageConstant.VOUCHER_CLAIM_FAILED);
         }
         return Result.success("购买成功");
-    }
-
-    private BigDecimal getMoneyFromRedis(Long userId) {
-        String moneyStr = (String) stringRedisTemplate.opsForHash().get(RedisConstant.USER_MONEY_KEY, userId.toString());
-        return moneyStr != null ? new BigDecimal(moneyStr) : BigDecimal.ZERO;
-    }
-
-    private void setMoneyToRedis(Long userId, BigDecimal money) {
-        stringRedisTemplate.opsForHash().put(RedisConstant.USER_MONEY_KEY, userId.toString(), money.toString());
     }
 }

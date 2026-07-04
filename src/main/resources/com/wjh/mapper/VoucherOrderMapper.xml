@@ -7,4 +7,11 @@
         insert ignore into voucher_order (user_id, voucher_id, shop_id, status, order_time)
         values (#{userId}, #{voucherId}, #{shopId}, #{status}, #{orderTime})
     </insert>
+    <select id="getByUserId" resultType="com.wjh.vo.ShopOrderVO">
+        select vo.*, s.name as shopName, v.value as voucherValue from voucher_order as vo, shop as s, voucher as v
+        where vo.voucher_id = v.id and vo.shop_id = s.id
+        and vo.user_id = #{userId}
+        and vo.status = #{status}
+        order by vo.order_time desc
+    </select>
 </mapper>

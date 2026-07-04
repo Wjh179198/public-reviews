@@ -32,4 +32,10 @@ public class MessageConstant {
     public static final String VOUCHER_ALREADY_CLAIMED = "用户已购买过该优惠券";
     public static final String MONEY_INVALID = "余额不足";
     public static final String VOUCHER_CLAIM_FAILED = "优惠券购买失败";
+    public static final String ORDER_PROCESSING = "订单处理中,请稍后重试";
+    public static final String ORDER_SUCCESS = "下单成功";
+    public static final String VOUCHER_NOT_BUY = "用户未购买过该优惠券";
+    public static final String VOUCHER_USED = "该优惠卷已被使用过";
+    public static final String SHOP_OWNER_BAN = "店铺 owners 被封禁, 无法购买";
+    public static final String ORDER_FAIL = "下单失败,请稍后重试";
 }
