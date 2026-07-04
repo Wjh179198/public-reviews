@@ -7,7 +7,9 @@ import com.wjh.result.PageResult;
 import com.wjh.result.Result;
 import com.wjh.service.AdminService;
 import com.wjh.vo.AdminVO;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,10 +18,22 @@ public class AdminController {
 
     @Autowired
     private AdminService adminService;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
 
     @PostMapping("/login")
     public Result login (@RequestBody AdminLoginDTO adminLoginDTO) {
         return adminService.login(adminLoginDTO);
+    }
+
+    @PostMapping("/logout")
+    public Result logout (HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        if(token != null && !token.isEmpty()) {
+            token = token.substring(7);
+        }
+        stringRedisTemplate.delete(RedisConstant.USER_LOGIN_KEY + token);
+        return Result.success("已退出");
     }
 
     @GetMapping("/users")

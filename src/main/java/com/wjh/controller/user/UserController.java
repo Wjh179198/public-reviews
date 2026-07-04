@@ -2,6 +2,7 @@ package com.wjh.controller.user;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.wjh.constant.RedisConstant;
 import com.wjh.dto.UserLoginDTO;
 import com.wjh.dto.UserRegisterDTO;
 import com.wjh.dto.UserUpdateDTO;
@@ -11,7 +12,9 @@ import com.wjh.result.PageResult;
 import com.wjh.result.Result;
 import com.wjh.service.UserService;
 import com.wjh.vo.UserVO;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,6 +25,8 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
 
     @PostMapping("/send-code")
     public Result sendCode (@RequestBody UserLoginDTO userLoginDTO) {
@@ -41,6 +46,16 @@ public class UserController {
     @PostMapping("/login/code")
     public Result loginByCode (@RequestBody UserLoginDTO userLoginDTO) {
         return userService.loginByCode(userLoginDTO);
+    }
+
+    @PostMapping("/logout")
+    public Result logout (HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        if(token != null && !token.isEmpty()) {
+            token = token.substring(7);
+        }
+        stringRedisTemplate.delete(RedisConstant.USER_LOGIN_KEY + token);
+        return Result.success("已退出");
     }
 
     @GetMapping("/info")
