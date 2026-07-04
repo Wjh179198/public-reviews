@@ -87,7 +87,7 @@ public class ShopOrderServiceImpl implements ShopOrderService {
             //更新商家用户余额
             userByShopId.setMoney(userByShopId.getMoney().add(money));
             userMapper.update(userByShopId);
-            MoneyUtil.setMoney(userByShopId.getId(), userByShopId.getMoney().add(money), stringRedisTemplate);
+            MoneyUtil.setMoney(userByShopId.getId(), userByShopId.getMoney(), stringRedisTemplate);
             //更新用户余额
             MoneyUtil.setMoney(userId, userMoney.subtract(money), stringRedisTemplate);
             User user = userMapper.getById(userId);
@@ -160,12 +160,14 @@ public class ShopOrderServiceImpl implements ShopOrderService {
             User userByShopId = userMapper.getByShopId(shopOrder.getShopId());
             userByShopId.setMoney(userByShopId.getMoney().subtract(useMoney));
             userMapper.update(userByShopId);
-            MoneyUtil.setMoney(userByShopId.getId(), userByShopId.getMoney().subtract(useMoney), stringRedisTemplate);
+            BigDecimal shopMoney = MoneyUtil.getMoney(userByShopId.getId(), stringRedisTemplate);
+            MoneyUtil.setMoney(userByShopId.getId(), shopMoney.subtract(useMoney), stringRedisTemplate);
             //更新用户余额
             User user = userMapper.getById(shopOrder.getUserId());
             user.setMoney(user.getMoney().add(useMoney));
             userMapper.update(user);
-            MoneyUtil.setMoney(shopOrder.getUserId(), user.getMoney(), stringRedisTemplate);
+            BigDecimal userMoney = MoneyUtil.getMoney(shopOrder.getUserId(), stringRedisTemplate);
+            MoneyUtil.setMoney(shopOrder.getUserId(), userMoney.add(useMoney), stringRedisTemplate);
             //修改优惠卷状态
             if (shopOrder.getVoucherId() != null) {
                 voucherOrderMapper.updateStatus(shopOrder.getVoucherId(), VoucherStatusConstant.AVAILABLE);

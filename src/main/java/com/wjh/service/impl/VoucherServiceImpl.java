@@ -162,7 +162,7 @@ public class VoucherServiceImpl implements VoucherService {
             return;
         }
         User userByShopId = userMapper.getByShopId(shopId);
-        BigDecimal shopMoney = userByShopId.getMoney();
+        BigDecimal shopMoney = MoneyUtil.getMoney(userByShopId.getId(), stringRedisTemplate);
         MoneyUtil.setMoney(userByShopId.getId(), shopMoney.add(voucherPrice), stringRedisTemplate);
         BigDecimal money = MoneyUtil.getMoney(userId, stringRedisTemplate);
         MoneyUtil.setMoney(userId, money.subtract(voucherPrice), stringRedisTemplate);
