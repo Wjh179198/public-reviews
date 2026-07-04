@@ -6,13 +6,13 @@ spring:
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
     url: jdbc:mysql://localhost:3306/public_reviews
-    username: root
-    password: Wjh1113@
+    username: ******
+    password: ******
   data:
     redis:
-      host: 115.29.237.141
-      port: 7000
-      password: 123456
+      host: ******
+      port: ******
+      password: ******
       timeout: 5s
       lettuce:
         pool:
@@ -22,14 +22,14 @@ spring:
 reviews:
   jwt:
     # 设置jwt签名加密时使用的秘钥
-    secret-key: itcast
+    secret-key: ******
     # 设置jwt过期时间
     ttl: 7200000
     # 设置前端传递过来的令牌名称
     token-name: token
   aliyun:
-    access-key-id: LTAI5t9p7WMpqRhehf6JLL82
-    access-key-secret: bAxcwwBJu6cf5ixbCKAeHLyKxJDINm
+    access-key-id: ******
+    access-key-secret: ******
     bucket-name: javaweb-wjh
     endpoint: oss-cn-hangzhou.aliyuncs.com
 
